@@ -1,0 +1,15 @@
+
+services:
+  db:
+    ports: 
+      - "127.0.0.1:5433:5432"
+    image: postgres:18
+    environment:
+      POSTGRES_USER: resolveai_app
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: resolveai
+    volumes:
+      - resolveai_pgdata:/var/lib/postgresql
+
+volumes:
+  resolveai_pgdata:
