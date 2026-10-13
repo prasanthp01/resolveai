@@ -4,7 +4,7 @@ The default public experience is deterministic and synthetic. It needs no provid
 
 ## Local development
 
-From the repository root, install locked dependencies with `uv sync --frozen` and `npm --prefix web ci`. Start the sandbox:
+From the repository root, install locked dependencies with `uv sync --frozen --python 3.12` and `npm --prefix web ci --ignore-scripts`. Start the sandbox:
 
 ```sh
 PUBLIC_ORIGIN=http://127.0.0.1:5179 uv run uvicorn app.sandbox.main:app --host 127.0.0.1 --port 8131 --workers 1
