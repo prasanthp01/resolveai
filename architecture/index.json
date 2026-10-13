@@ -1,0 +1,11 @@
+{
+  "current": "1.0.0",
+  "versions": [
+    {
+      "version": "1.0.0",
+      "date": "2026-10-13",
+      "summary": "Initial evidence-first investigation architecture and study guide."
+    }
+  ],
+  "source_commit": "0b2ca9f5ea986df94cf6543906019011f221e445"
+}
