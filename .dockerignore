@@ -1,0 +1,11 @@
+.git
+.env*
+**/*.env
+.venv
+web/node_modules
+web/dist
+work
+output
+tests
+docs
+*.dump

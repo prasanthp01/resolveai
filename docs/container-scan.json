@@ -1,0 +1,16 @@
+{
+  "tool": "Trivy 0.69.3",
+  "verified_at": "2026-10-12T23:24:32.599609+00:00",
+  "image": "resolveai:0.1.0-local",
+  "base": "python:3.12-alpine with apk upgrade",
+  "image_id": "sha256:63f1490be39893cc6fb49ac2ee7071e02b0a43c2e12846d8127e762148439820",
+  "os": {
+    "Family": "alpine",
+    "Name": "3.24.2"
+  },
+  "severity_filter": [
+    "HIGH",
+    "CRITICAL"
+  ],
+  "findings": 0
+}

@@ -1,0 +1,46 @@
+name: resolveai-private
+x-runtime: &runtime
+  image: ${RESOLVEAI_IMAGE:-resolveai:0.1.0}
+  env_file: private.env
+  restart: unless-stopped
+  cap_drop: ["ALL"]
+  security_opt: ["no-new-privileges:true"]
+  read_only: true
+  tmpfs: ["/tmp:size=16m"]
+  depends_on:
+    db: {condition: service_healthy}
+  logging:
+    driver: json-file
+    options: {max-size: "5m", max-file: "2"}
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: resolveai_migrator
+      POSTGRES_PASSWORD: ${MIGRATION_PASSWORD:?Set migration password}
+      POSTGRES_DB: resolveai
+      APP_PASSWORD: ${APP_PASSWORD:?Set application password}
+    volumes:
+      - private_db:/var/lib/postgresql
+      - ./init-db.sh:/docker-entrypoint-initdb.d/01-roles.sh:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U resolveai_migrator -d resolveai"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  api:
+    <<: *runtime
+    ports: ["127.0.0.1:${RESOLVEAI_PRIVATE_PORT:-8131}:8000"]
+  worker:
+    <<: *runtime
+    command: [".venv/bin/python", "-m", "app.jobs.worker"]
+  migrate:
+    <<: *runtime
+    profiles: ["maintenance"]
+    restart: 'no'
+    environment:
+      DATABASE_URL: postgresql+asyncpg://resolveai_migrator:${MIGRATION_PASSWORD}@db:5432/resolveai
+    command: [".venv/bin/alembic", "upgrade", "head"]
+volumes:
+  private_db:

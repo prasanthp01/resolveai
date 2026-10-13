@@ -1,0 +1,8 @@
+{
+  "backup_restore": "PASS",
+  "rows_incidents_reports_evidence": "1,1,3",
+  "readiness_during_outage": 503,
+  "readiness_after_restart": 200,
+  "persistence_after_restart": "PASS",
+  "backup_bytes": 33719
+}

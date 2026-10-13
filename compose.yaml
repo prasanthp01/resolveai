@@ -1,15 +1,17 @@
-
+name: resolveai-local
 services:
   db:
-    ports: 
-      - "127.0.0.1:5433:5432"
-    image: postgres:18
+    image: postgres:18-alpine
     environment:
       POSTGRES_USER: resolveai_app
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD}
       POSTGRES_DB: resolveai
-    volumes:
-      - resolveai_pgdata:/var/lib/postgresql
-
+    ports: ["127.0.0.1:55433:5432"]
+    volumes: ["resolveai_pgdata:/var/lib/postgresql"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U resolveai_app -d resolveai"]
+      interval: 3s
+      timeout: 2s
+      retries: 20
 volumes:
   resolveai_pgdata:

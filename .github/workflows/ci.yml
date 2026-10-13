@@ -1,0 +1,48 @@
+name: Verify
+on:
+  push:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          fetch-depth: 0
+      - name: Set up isolated Python tooling
+        run: |
+          python3 -m venv .tools
+          .tools/bin/pip install uv==0.12.15
+          .tools/bin/uv sync --frozen
+          .venv/bin/python scripts/test_config.py
+      - name: Start disposable dependencies and migrate
+        run: |
+          docker compose --env-file .env -f deploy/compose.test.yaml up -d --wait
+          .venv/bin/alembic upgrade head
+          .venv/bin/alembic check
+      - name: Backend verification
+        run: |
+          .venv/bin/ruff check app tests scripts alembic
+          .venv/bin/ruff format --check app tests scripts alembic
+          .venv/bin/mypy app
+          .venv/bin/pytest -q
+          .venv/bin/pip-audit
+      - name: Frontend verification
+        working-directory: web
+        run: |
+          npm ci --ignore-scripts
+          npm run build
+          npm audit --audit-level=moderate
+      - name: Architecture and source gates
+        run: |
+          .venv/bin/python scripts/architecture.py --check
+          .venv/bin/python scripts/scan_source.py
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            .venv/bin/python scripts/check_architecture_history.py "${{ github.event.pull_request.base.sha }}"
+          fi
+      - name: Stop only the disposable test project
+        if: always()
+        run: docker compose --env-file .env -f deploy/compose.test.yaml down

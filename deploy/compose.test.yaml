@@ -1,0 +1,26 @@
+name: resolveai-test
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: resolveai_app
+      POSTGRES_PASSWORD: ${TEST_DB_PASSWORD:?Set TEST_DB_PASSWORD}
+      POSTGRES_DB: resolveai
+    ports: ["127.0.0.1:55433:5432"]
+    volumes: ["test_db:/var/lib/postgresql"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U resolveai_app -d resolveai"]
+      interval: 3s
+      timeout: 2s
+      retries: 20
+  diagnostics:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_PASSWORD: ${TEST_DB_PASSWORD}
+    ports: ["127.0.0.1:55434:5432"]
+  redis:
+    image: redis:7-alpine
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
+    ports: ["127.0.0.1:55435:6379"]
+volumes:
+  test_db:

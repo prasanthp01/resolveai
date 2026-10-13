@@ -1,0 +1,12 @@
+{
+  "profile": "isolated-private-compose",
+  "health": 200,
+  "owner_bootstrap": "PASS",
+  "runtime_non_superuser": "PASS",
+  "application_environment_source": "PASS",
+  "durable_worker_report": "PASS",
+  "deduplication": "PASS",
+  "revocation": "PASS",
+  "evidence_count": 3,
+  "model_calls": 0
+}

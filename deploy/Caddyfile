@@ -1,0 +1,8 @@
+# For a dedicated host only. Reuse an existing proxy if one already owns 80/443.
+portfolio.gappazappa.in {
+    encode zstd gzip
+    request_body {
+        max_size 32KB
+    }
+    reverse_proxy 127.0.0.1:8130
+}

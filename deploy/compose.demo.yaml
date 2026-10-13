@@ -1,0 +1,27 @@
+name: resolveai-demo
+services:
+  demo:
+    image: ${RESOLVEAI_IMAGE:-resolveai:0.1.0}
+    build:
+      context: ..
+    environment:
+      DEMO_MODE: 'true'
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:-https://portfolio.gappazappa.in}
+      COOKIE_SECURE: 'true'
+      LLM_ENABLED: 'false'
+      BUILD_SHA: ${BUILD_SHA:-development}
+    ports: ["127.0.0.1:8130:8000"]
+    restart: unless-stopped
+    read_only: true
+    tmpfs: ["/tmp:size=16m"]
+    cap_drop: ["ALL"]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 100
+    healthcheck:
+      test: ["CMD", ".venv/bin/python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=2)"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    logging:
+      driver: json-file
+      options: {max-size: "5m", max-file: "2"}

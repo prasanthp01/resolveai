@@ -1,0 +1,26 @@
+{
+  "verified_at": "2026-10-12T23:24:32.599609+00:00",
+  "pytest": {
+    "passed": 45,
+    "failed": 0,
+    "skipped": 0
+  },
+  "python_dependency_findings": 0,
+  "frontend_dependency_findings": 0,
+  "container_high_critical_findings": 0,
+  "source_secret_scan": "PASS; refresh before publication",
+  "public_model_calls": 0,
+  "live_provider_evaluation": "NOT RUN",
+  "public_vps": "NOT DEPLOYED",
+  "architecture_version": "1.0.0",
+  "application_version": "0.1.0",
+  "migration": "3c57cd3d805f",
+  "browser_widths": [
+    360,
+    390,
+    768,
+    1024,
+    1440,
+    1920
+  ]
+}

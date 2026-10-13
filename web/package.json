@@ -1,0 +1,31 @@
+{
+  "name": "resolveai-web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "tsc --noEmit && npm run diagrams && vite build",
+    "typecheck": "tsc --noEmit",
+    "diagrams": "node scripts/check-diagrams.mjs"
+  },
+  "dependencies": {
+    "lucide-react": "^0.468.0",
+    "mermaid": "^11.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-router-dom": "^7.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "jsdom": "^26.1.0",
+    "prettier": "^3.9.10",
+    "typescript": "^5.7.0",
+    "vite": "^6.1.0"
+  },
+  "overrides": {
+    "katex": "^0.18.2"
+  }
+}
