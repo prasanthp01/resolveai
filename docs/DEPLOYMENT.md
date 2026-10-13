@@ -1,42 +1,21 @@
 # Deployment
 
-The public target is `portfolio.gappazappa.in`. Verify the current status in RELEASE_EVIDENCE.md before assuming it is live. Keep public content synthetic.
+## Public synthetic studio
 
-## Public static profile (small shared VPS)
+Follow [SELF_HOST.md](v4/SELF_HOST.md). The current interactive studio uses `deploy/compose.sandbox.yaml`; `compose.demo.yaml` and static export scripts retain an older recorded-demo profile. A static export does not execute editable server workflows.
 
-Build the frontend and validate architecture. Export only the public endpoints:
+Set `PUBLIC_ORIGIN` to your exact HTTPS origin, terminate TLS at a maintained reverse proxy and forward the service's loopback port. Preserve Origin headers, disable SSE buffering and enforce bounded bodies, timeouts and request rates at the edge. Monitor readiness, container restarts and host capacity. Keep one sandbox API process: runs and sessions are bounded, ephemeral and intentionally expire on restart.
 
-```sh
-npm --prefix web ci --ignore-scripts
-npm --prefix web run build
-uv run python scripts/architecture.py --check
-uv run python scripts/export_demo.py /path/to/new-release-directory
-```
+## Private self-hosted runtime
 
-The output contains React assets, the supplied logo, four synthetic scenario/report responses, the architecture index/snapshots, and static health responses. It contains no administrator endpoint implementation, environment file, credential, private data, or database.
+This is a separate deployment, never a replacement for an anonymous public backend. Create `deploy/private.env` with mode 0600, unique URL-safe `MIGRATION_PASSWORD` and `APP_PASSWORD`, a `DATABASE_URL` for `resolveai_app@db:5432/resolveai`, `DEMO_MODE=false`, `COOKIE_SECURE=true`, your exact HTTPS `PUBLIC_ORIGIN`, a Fernet `CONNECTOR_KEY`, and narrow `ALLOWED_CONNECTOR_NETWORKS`.
 
-Use the existing approved HTTPS proxy rather than replacing a server already using 80/443. `deploy/nginx-static-server.conf` is a template for an isolated vhost, with rate limits, GET/HEAD-only access, strict asset paths, and SPA deep-link fallback. Adapt the filesystem path to a dedicated release directory. Obtain and renew a valid certificate using the existing host certificate tooling. Test configuration before a graceful reload. Preserve a backup of the prior proxy file.
+`deploy/compose.private.yaml` keeps PostgreSQL and the worker off host ports. The migration identity owns schema changes; the application identity has restricted runtime grants. Start the database, run the maintenance-profile migration, bootstrap an owner with the CLI, then start the API and worker. Do not share public and private credentials, networks or storage. See [connector minimum privileges](CONNECTORS.md).
 
-Use versioned release directories and an atomic `current` symlink switch. Keep the previous release for rollback. A static rollback does not migrate a database. Verify HTTPS, all four scenarios, `/architecture`, architecture API versions, deep-link reload, negative POST/private endpoint checks, and security headers after deployment. Confirm unrelated vhosts still respond as before.
+Use the image built from your reviewed source commit and record its digest. Never bake private environment files into an image. Configure encrypted off-host backups and execute a restore to a new isolated database before accepting private data; see [operations](OPERATIONS.md). Keep prior images for application rollback and review schema compatibility before rolling back across migrations.
 
-## Public container profile
+## Release checks
 
-`docker build -t resolveai:0.1.0 .` builds the same demo and backend application. Run `RESOLVEAI_IMAGE=resolveai:0.1.0 docker compose -f deploy/compose.demo.yaml up -d`. It binds only host loopback 8130. Place an approved HTTPS proxy in front of it. This profile starts no database or worker and carries no live credentials.
+Verify the configured origin, TLS, secure cookies, health, success and controlled-failure scenarios, session ownership, negative private-route checks and SSE through the real proxy. Check CPU, memory, disk and log rotation. Observe existing services before and after any proxy change. Configuration templates require adaptation to your host; they do not certify its security or capacity.
 
-## Private self-hosted profile
-
-The private instance is separate from the public demo. Configure `deploy/private.env` with unique random MIGRATION_PASSWORD, APP_PASSWORD, runtime DATABASE_URL for `resolveai_app@db:5432/resolveai`, DEMO_MODE=false, COOKIE_SECURE=true, the exact HTTPS PUBLIC_ORIGIN, an external CONNECTOR_KEY, and narrow ALLOWED_CONNECTOR_NETWORKS. Use URL-safe random passwords or URL-encode them in DATABASE_URL. Keep this file mode 600, off Git and outside image build contexts.
-
-`deploy/compose.private.yaml` starts PostgreSQL 18 with persistent storage at `/var/lib/postgresql`, an API, and one worker. The initialization script creates a non-superuser runtime role. The separately privileged migration identity owns schema changes. Start the DB first, run the maintenance-profile migration service, then start API and worker. Use the local bootstrap CLI with the private runtime configuration to create the owner; no default account is shipped.
-
-Do not start this stack alongside a public instance without verifying available CPU, memory, disk, port allocation, and credential/network separation. The production DB and worker have no host-published ports. Configure encrypted off-host backups and perform a disposable restore before operational use.
-
-## Release preflight
-
-Inspect existing services, disk, memory, DNS, certificates, and proxy ownership. Preserve application data and unrelated services. Do not prune unknown volumes or remove unrelated data to make room. Record source SHA, image digest when applicable, migration version, artifact hash, verification time, and actual URL. Deployment blocked by host conditions must remain explicitly NOT DEPLOYED.
-
-## Shared-proxy integration used for this release
-
-The live proxy had a pre-existing stale individual-file bind mount. A new dedicated ResolveAI configuration file was loaded into its writable configuration directory and a matching read-only file mount was added to the canonical Compose definition for future recreation. This avoided restarting unrelated applications. On subsequent configuration changes, update the host ResolveAI file and the current container copy if the mount has not yet taken effect; validate with nginx -t, then gracefully reload. Do not recreate the proxy merely to deploy new static assets. Release changes use the dedicated current symlink.
-
-The certificate-renewal hook is limited to the ResolveAI domain and validates the proxy before reload. The renewal dry run passed. Backups of the original proxy and Compose files are retained privately on the host. Deployment receipts intentionally omit unrelated service names and internal paths.
+Live LLM quality, external billing, production load and independent penetration tests are not established by the synthetic release. Keep external model use disabled until separately configured, budgeted and validated.

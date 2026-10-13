@@ -1,7 +1,8 @@
-Describe the problem and resulting behavior.
+## Change
+Describe the user-visible behavior and reason.
 
-- [ ] Meaningful tests passed; commands/results included.
-- [ ] No credentials, private data, or unsupported claims.
-- [ ] Architecture snapshot/explanations updated if affected; prior versions preserved.
-- [ ] Public demo remains synthetic and restricted.
-- [ ] Limitations and migration/rollback effects documented.
+## Validation
+List checks actually run, results and deployment considerations.
+
+## Scope
+Confirm fixtures contain only synthetic data and document new permissions, migrations or external calls.

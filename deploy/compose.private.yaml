@@ -1,8 +1,11 @@
 name: resolveai-private
 x-runtime: &runtime
-  image: ${RESOLVEAI_IMAGE:-resolveai:0.1.0}
+  image: ${RESOLVEAI_IMAGE:?Set a verified ResolveAI image}
   env_file: private.env
   restart: unless-stopped
+  mem_limit: 256m
+  cpus: 0.5
+  pids_limit: 100
   cap_drop: ["ALL"]
   security_opt: ["no-new-privileges:true"]
   read_only: true
@@ -14,7 +17,10 @@ x-runtime: &runtime
     options: {max-size: "5m", max-file: "2"}
 services:
   db:
-    image: postgres:18-alpine
+    image: postgres:18-alpine@sha256:77f585114c32fbca283dc835b0596f4e52b51b4c6662d7810b2f4084f60a1873
+    mem_limit: 384m
+    cpus: 0.5
+    pids_limit: 100
     environment:
       POSTGRES_USER: resolveai_migrator
       POSTGRES_PASSWORD: ${MIGRATION_PASSWORD:?Set migration password}
@@ -34,6 +40,12 @@ services:
     ports: ["127.0.0.1:${RESOLVEAI_PRIVATE_PORT:-8131}:8000"]
   worker:
     <<: *runtime
+    healthcheck:
+      test: [CMD, .venv/bin/python, -m, app.jobs.health]
+      interval: 20s
+      timeout: 3s
+      start_period: 60s
+      retries: 3
     command: [".venv/bin/python", "-m", "app.jobs.worker"]
   migrate:
     <<: *runtime

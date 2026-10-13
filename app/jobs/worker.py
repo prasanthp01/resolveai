@@ -384,10 +384,13 @@ async def run_once(owner="worker"):
 
 
 async def main():
+    from app.jobs.health import mark_ready
+
     if settings().demo_mode:
         raise SystemExit("Public demo has no worker")
     while True:
         worked = await run_once(socket.gethostname())
+        mark_ready()
         await asyncio.sleep(0.2 if worked else 3)
 
 

@@ -23,13 +23,13 @@ export default function CaseStudy() {
   }, [open]);
   const links = (
     <>
-      <a href="/">← Portfolio home</a>
+      <a href="https://github.com/prasanthp01/resolveai">Source &amp; documentation</a>
       <a className="current" href="#project-top">
         ResolveAI <span>01</span>
       </a>
-      <a href="/projects/flowops">FlowOps</a>
-      <a href="/projects/knowledgeops">KnowledgeOps</a>
-      <a href="/projects/agentops">AgentOps</a>
+      <a href="https://github.com/prasanthp01/flowops">FlowOps</a>
+      <a href="https://github.com/prasanthp01/knowledgeops">KnowledgeOps</a>
+      <a href="https://github.com/prasanthp01/agentops">AgentOps</a>
     </>
   );
   return (
@@ -39,7 +39,7 @@ export default function CaseStudy() {
       </a>
       <aside className="case-sidebar">
         <a className="case-wordmark" href="/projects/resolveai">
-          P<span>.</span>
+          R<span>.</span>
         </a>
         <p className="studio-kicker">ENGINEERING PROJECTS</p>
         <nav aria-label="Project navigation">{links}</nav>

@@ -30,8 +30,8 @@ Implementation commit: `0b0e32acada6dd7112158af2e1c39fddb13244f5`. Deployed sour
 
 The static archive SHA-256 is `e9553f8b951a28d59721b801bec2f729535684434386dd42f72934efe426a421`. It was activated by an atomic symlink switch at 2026-10-13T09:19:49Z. No proxy recreation or new VPS application services were required. The prior v0.1.0 release is retained as the rollback target. The activation script restores it automatically if its new-version probes fail; a separate v0.2.0 rollback round trip was NOT RUN.
 
-![Editable simulation lab](assets/simulation-v0.2.0.png)
+Historical screenshot omitted from the source release.
 
-![Non-technical final result](assets/simulation-result-v0.2.0.png)
+Historical screenshot omitted from the source release.
 
 See [SIMULATION_GUIDE.md](SIMULATION_GUIDE.md) for exercises, actual report meaning, API mapping, fidelity limits and the refresh workflow. The verified backend recordings are distinct from generated browser traces; neither claims to be production telemetry or a performance benchmark.

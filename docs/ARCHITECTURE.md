@@ -1,8 +1,8 @@
-# ResolveAI architecture v2.0.8
+# ResolveAI architecture v2.0.9
 
-Application v0.3.6 · 2026-10-13 · Source commit `2b2449459751a66e97c23c1b89d7cb3195f4c995`
+Application v0.3.7 · 2026-10-13 · Source commit `ea397014beb8736cf0f105d949781e5029276360`
 
-Architecture diagrams use build-time SVG assets and external styles so the strict Portfolio CSP preserves readable labels, edges and zoom controls.
+Standalone synthetic studio served alongside its API, with portable container configuration and preserved private-runtime isolation.
 
 ## High-level architecture
 
@@ -469,10 +469,12 @@ Verification uses the same strict policy as the frozen Portfolio, checks compute
 
 ## Version changes
 
-- Move Mermaid execution from visitors to an explicit build-only compiler; checked-in SVG and external CSS are verified against every immutable diagram source.
+- Serve compiled public studio assets from the synthetic service; unknown API and asset paths remain strict 404s.
 
-- Remove all SVG style elements/style attributes and runtime inline zoom styles. Preserve the host style-src self policy.
+- Publish a loopback-only one-container quick start with configurable public origin and resource limits.
 
-- Render only exact known source/asset matches and show a visible source fallback when the matching compiled diagram is unavailable.
+- Pin the frontend build base image and add runtime health monitoring.
 
-- Support keyboard-scrollable diagrams, stylesheet-based 100-500 percent zoom and a Fit reset.
+- Exclude private portfolio assets and operational handoffs from the open-source distribution.
+
+- Monitor the private worker with a successful-loop heartbeat and bound private runtime resource use.
