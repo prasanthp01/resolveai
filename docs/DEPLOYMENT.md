@@ -34,3 +34,9 @@ Do not start this stack alongside a public instance without verifying available 
 ## Release preflight
 
 Inspect existing services, disk, memory, DNS, certificates, and proxy ownership. Preserve application data and unrelated services. Do not prune unknown volumes or remove unrelated data to make room. Record source SHA, image digest when applicable, migration version, artifact hash, verification time, and actual URL. Deployment blocked by host conditions must remain explicitly NOT DEPLOYED.
+
+## Shared-proxy integration used for this release
+
+The live proxy had a pre-existing stale individual-file bind mount. A new dedicated ResolveAI configuration file was loaded into its writable configuration directory and a matching read-only file mount was added to the canonical Compose definition for future recreation. This avoided restarting unrelated applications. On subsequent configuration changes, update the host ResolveAI file and the current container copy if the mount has not yet taken effect; validate with nginx -t, then gracefully reload. Do not recreate the proxy merely to deploy new static assets. Release changes use the dedicated current symlink.
+
+The certificate-renewal hook is limited to the ResolveAI domain and validates the proxy before reload. The renewal dry run passed. Backups of the original proxy and Compose files are retained privately on the host. Deployment receipts intentionally omit unrelated service names and internal paths.

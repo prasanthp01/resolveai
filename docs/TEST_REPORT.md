@@ -8,7 +8,7 @@ Verification date: 2026-10-13. These are local results, not production-load or l
 | Python types | `uv run mypy app` | PASS: 15 source files |
 | Backend/security/evaluation suite | `uv run pytest -q --junitxml=docs/test-results.xml` | PASS: 45, zero failures/skips |
 | Database schema | `uv run alembic upgrade head`; `uv run alembic check` | PASS: fresh PostgreSQL 18 database, revision 3c57cd3d805f, no drift |
-| Frontend | `npm --prefix web run build` | PASS: TypeScript, all four Mermaid diagrams, production bundle |
+| Frontend | `npm --prefix web run build` | PASS: TypeScript, all eight Mermaid diagrams across two snapshots, production bundle |
 | Python advisories | `uv run pip-audit` | PASS: no known dependency findings at scan time |
 | Frontend advisories | `npm --prefix web audit` | PASS: zero findings after dependency override |
 | Container advisories | Trivy 0.69.3 image scan, HIGH/CRITICAL | PASS: zero findings in the final Alpine-based runtime |
@@ -17,7 +17,7 @@ Verification date: 2026-10-13. These are local results, not production-load or l
 | Private Compose | Dedicated QA project, real HTTP API and worker, restricted runtime role | PASS: bootstrap, application/environment/source, 202 acceptance, report, duplicate, revocation |
 | Backup/recovery | Custom-format dump → fresh disposable DB; stop/restart only test DB | PASS: 1 incident, 1 report, 3 evidence rows restored; outage 503, recovery 200, rows retained |
 | Browser | Codex browser automation against actual localhost app | PASS: public overview/scenarios/replay/report/export and architecture views; private login/setup/note flow; responsive checks |
-| Public VPS/TLS | Target shared VPS | BLOCKED: root filesystem full; deployment not attempted |
+| Public VPS/TLS | External HTTPS/API/browser checks | PASS: 22 public checks, preserved existing-site responses, valid TLS and renewal dry run |
 | Live model evaluation | External provider | NOT RUN: no live provider enabled or billed |
 | Extended load/soak, external penetration test | Not executed | NOT RUN; no reliability or independent-audit claim |
 
@@ -28,3 +28,5 @@ A recovery drill initially found that connection refusal returned 500. Readiness
 Browser checks covered widths 360, 390, 768, 1024, 1440 and 1920 with no overview document overflow. Report and architecture views were inspected at mobile and desktop sizes. This is browser smoke coverage, not a WCAG certification. Mermaid is lazily loaded; its large vendor chunks remain a build warning and a performance follow-up.
 
 Receipts: [JUnit](test-results.xml), [summary](verification-summary.json), [container scan summary](container-scan.json), [recovery](recovery-results.json), [private Compose](private-compose-results.json), and genuine screenshots in assets/. Full private execution logs and database dumps are excluded from publication.
+
+The public artifact was restored byte-for-byte in a disposable directory. Atomic symlink switching was rehearsed there, then verified against the actual public service: architecture 1.0.1 → 1.0.0 → 1.0.1, with successful HTTPS reads at each step. See [deployment receipt](deployment.json), [public smoke](public-smoke.json), and [staging recovery](public-recovery.json). Both architecture records remain available; the 1.0.0 file was not edited.

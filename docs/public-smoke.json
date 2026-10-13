@@ -1,0 +1,38 @@
+{
+  "verified_at": "2026-10-13T07:41:25.157797+00:00",
+  "origin": "https://portfolio.gappazappa.in",
+  "tls_verified": true,
+  "http_redirect": 301,
+  "checks": {
+    "/": 200,
+    "/architecture": 200,
+    "/architecture?version=1.0.0&view=low": 200,
+    "/incidents": 200,
+    "/health/live": 200,
+    "/health/ready": 200,
+    "/api/v1/config": 200,
+    "/api/v1/architecture": 200,
+    "/api/v1/architecture/1.0.1": 200,
+    "/api/v1/architecture/1.0.0": 200,
+    "scenario:postgres-saturation": "PASS",
+    "scenario:release-regression": "PASS",
+    "scenario:redis-pressure": "PASS",
+    "scenario:provider-limits": "PASS",
+    "/api/v1/applications": 404,
+    "/api/v1/incidents": 404,
+    "/api/v1/auth/me": 404,
+    "/api/v1/openapi.json": 404,
+    "/api/v1/architecture/9.9.9": 404,
+    "POST /api/v1/events": 403,
+    "POST /api/v1/auth/login": 403,
+    "POST /api/v1/connectors": 403
+  },
+  "headers": {
+    "content-security-policy": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "DENY",
+    "strict-transport-security": "max-age=31536000",
+    "referrer-policy": "no-referrer"
+  },
+  "model_calls": 0
+}

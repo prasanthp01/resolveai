@@ -4,6 +4,8 @@
 
 ResolveAI accepts scoped alerts, gathers restricted diagnostic evidence, and produces traceable reports for human review. It is a single-tenant self-hosted public beta. The public demo uses synthetic data and deterministic analysis; it performs no production remediation or paid inference.
 
+[Open the synthetic demo](https://portfolio.gappazappa.in) · [Study the architecture](https://portfolio.gappazappa.in/architecture)
+
 Explore four scenarios: PostgreSQL connection pressure, a release regression, Redis pressure, and upstream rate limiting. The `/architecture` page explains the actual high- and low-level design with diagrams, code references, walkthroughs, and retained versions.
 
 ![Synthetic ResolveAI overview](docs/assets/overview-desktop.png)

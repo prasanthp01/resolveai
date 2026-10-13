@@ -1,0 +1,9 @@
+{
+  "public_archive_restore": "PASS",
+  "restored_files": 77,
+  "byte_identical": true,
+  "atomic_switch_and_rollback": "PASS",
+  "scope": "disposable staging filesystem; public service was not switched",
+  "production_historical_rollback": "NOT RUN: initial release has no previous production version",
+  "artifact_sha256": "c23e831e5fa8bcf40c39c0f28ccde41edcaeae601f5a45bf7dfa15f4bf01f6ad"
+}

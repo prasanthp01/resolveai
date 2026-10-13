@@ -1,0 +1,13 @@
+{
+  "activated_at": "2026-10-13T07:41:19.809255+00:00",
+  "application_version": "0.1.0",
+  "architecture_version": "1.0.1",
+  "source_commit": "47841ee92be07a4d4dc5c9df68829ffd83f4752a",
+  "artifact_sha256": "cb3ccb601ba24f0c28638dac46cbb03f1af8395971a169ae4cc3301dc1430284",
+  "profile": "synthetic-static",
+  "proxy_recreated": false,
+  "public_rollback_and_forward_check": "PASS",
+  "previous_architecture": "1.0.0",
+  "current_architecture": "1.0.1",
+  "renewal_dry_run": "PASS"
+}

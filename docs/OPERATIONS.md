@@ -31,3 +31,7 @@ To verify recovery, create a new disposable database, restore with pg_restore --
 Public static rollback switches the release symlink to a preserved prior export and reloads only when configuration changed. Container rollback uses a previously verified image digest. Database changes must be backward-compatible or use an explicitly reviewed migration plan; never blindly downgrade a data-destructive migration. The initial schema downgrade drops data and is suitable only for disposable test environments.
 
 Known limitations: no certified tamper-proof audit storage, no off-host backup destination selected, no production load/soak guarantee, and no externally configured alerting service. Host disk and existing workloads must be healthy before deployment.
+
+## Public deployment record
+
+The current deployment uses the static profile with automatic certificate renewal. Export archives and source are retained outside the VPS; no mutable public user state exists. A release backup is created at each deployment. The safe rollback/forward drill passed over HTTPS. Private operational backup schedules and off-host encryption must be configured when deploying a private database.

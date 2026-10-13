@@ -1,9 +1,9 @@
 {
   "tool": "Trivy 0.69.3",
-  "verified_at": "2026-10-12T23:24:32.599609+00:00",
-  "image": "resolveai:0.1.0-local",
+  "verified_at": "2026-10-13T07:43:28.524765+00:00",
+  "image": "resolveai:0.1.0",
   "base": "python:3.12-alpine with apk upgrade",
-  "image_id": "sha256:63f1490be39893cc6fb49ac2ee7071e02b0a43c2e12846d8127e762148439820",
+  "image_id": "sha256:210a29c1694e07e344adaef80e1b6a760b6b266d4f8d7f2559c13b48acc55b9d",
   "os": {
     "Family": "alpine",
     "Name": "3.24.2"

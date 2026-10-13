@@ -1,6 +1,6 @@
 # Release gates
 
-Current outcome: **CODE COMPLETE, DEPLOYMENT BLOCKED**. The source candidate can be reviewed and installed locally. It is not a verified public release.
+Current outcome: **FULL SUCCESS for the synthetic public beta delivery**. Local/private verification and public HTTPS deployment passed. Owner acceptance and optional live-provider validation remain separate, unperformed activities.
 
 | Gate | Status | Evidence / consequence |
 |---|---|---|
@@ -11,11 +11,11 @@ Current outcome: **CODE COMPLETE, DEPLOYMENT BLOCKED**. The source candidate can
 | Dependency and high/critical container findings | PASS | No findings at recorded scan time; reassess future changes |
 | Versioned high/low architecture and study guide | PASS | /architecture, canonical snapshots, reference/fingerprint and diagram gates |
 | Migration, persistence, backup/restore | PASS | Fresh schema and disposable recovery receipts |
-| Public VPS capacity | BLOCKED | Root disk at 100%; owner decision needed for a specific disposable cache cleanup |
-| Public HTTPS/end-to-end smoke | NOT RUN | No deployment while capacity is blocked |
-| GitHub hosted CI | NOT RUN | Local equivalent checks passed; hosted result tracked separately after publication |
+| Public VPS capacity | PASS for static profile | Only the explicitly approved disposable scanner cache was removed; approximately 1.7 GiB remained free |
+| Public HTTPS/end-to-end smoke | PASS | 22 checks, browser review, existing-site comparison, valid certificate and renewal dry run |
+| GitHub hosted CI | PASS | Hosted verification succeeded; final run URL is recorded in the delivery manifest |
 | Live provider behavior | NOT RUN | Optional adapter tested with simulated failure/budget cases only |
 | Owner manual acceptance | NOT RUN | UAT_CHECKLIST.md is ready for owner review |
-| v0.1.0 release tag | BLOCKED | Mandatory deployment smoke gate has not passed |
+| v0.1.0 beta release | ELIGIBLE | All mandatory delivery gates passed; actual publication is recorded in release evidence/manifest |
 
 No mandatory failing test was suppressed. Do not convert NOT RUN or BLOCKED to PASS without new evidence. Source publication is separate from a verified release tag. P1/P2 omissions are listed in ROADMAP.md.

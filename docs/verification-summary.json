@@ -11,8 +11,8 @@
   "source_secret_scan": "PASS; refresh before publication",
   "public_model_calls": 0,
   "live_provider_evaluation": "NOT RUN",
-  "public_vps": "NOT DEPLOYED",
-  "architecture_version": "1.0.0",
+  "public_vps": "PASS: HTTPS synthetic-static deployment",
+  "architecture_version": "1.0.1",
   "application_version": "0.1.0",
   "migration": "3c57cd3d805f",
   "browser_widths": [
@@ -22,5 +22,9 @@
     1024,
     1440,
     1920
-  ]
+  ],
+  "public_https_checks": 22,
+  "public_rollback": "PASS",
+  "certificate_renewal_dry_run": "PASS",
+  "hosted_ci": "PASS: first source verification; final source run recorded in delivery manifest"
 }
