@@ -1,0 +1,32 @@
+{
+  "verified_at": "2026-10-13T11:20:05.034426+00:00",
+  "checks": [
+    {
+      "path": "/",
+      "status": 200,
+      "content_type": "text/html"
+    },
+    {
+      "path": "/architecture",
+      "status": 200,
+      "content_type": "text/html"
+    },
+    {
+      "path": "/simulation",
+      "status": 200,
+      "content_type": "text/html"
+    },
+    {
+      "path": "/api/v1/config",
+      "status": 200,
+      "content_type": "application/json",
+      "config": {
+        "demo": true,
+        "version": "0.2.0",
+        "build_sha": "0b0e32acada6dd7112158af2e1c39fddb13244f5",
+        "live_ai_enabled": false
+      }
+    }
+  ],
+  "scope": "Existing public release preservation; not v4 public deployment"
+}

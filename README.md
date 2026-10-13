@@ -1,79 +1,71 @@
 <p align="center"><img src="web/public/resolveai-logo.png" width="360" alt="ResolveAI" /></p>
 
-# Evidence-first incident investigation
+# ResolveAI
 
-ResolveAI accepts scoped alerts, gathers restricted diagnostic evidence, and produces traceable reports for human review. It is a single-tenant self-hosted public beta. The public demo uses synthetic data and deterministic analysis; it performs no production remediation or paid inference.
+Evidence-first incident investigation: collect scoped diagnostics, investigate an alert, and produce a report whose conclusions link back to evidence. Human operators retain control of decisions and remediation.
 
-[Open the synthetic demo](https://portfolio.gappazappa.in) · [Study the architecture](https://portfolio.gappazappa.in/architecture)
+**Source release 0.3.7.** The default studio is a deterministic, synthetic demonstration. It runs server-side code without a model key, production database or external action. The optional private runtime has authenticated users, durable PostgreSQL jobs and restricted PostgreSQL/Redis diagnostics. These runtimes are deliberately separate.
 
-Explore four scenarios: PostgreSQL connection pressure, a release regression, Redis pressure, and upstream rate limiting. The `/architecture` page explains the actual high- and low-level design with diagrams, code references, walkthroughs, and retained versions.
+## Run the studio
 
-![Synthetic ResolveAI overview](docs/assets/overview-desktop.png)
+Install Docker Engine with Compose v2:
 
-See [release evidence](docs/RELEASE_EVIDENCE.md) for the verified deployment status and [release gates](docs/RELEASE_GATES.md) for limits. An implementation, a successful test, and an owner acceptance decision are separate facts.
+```sh
+git clone https://github.com/prasanthp01/resolveai.git
+cd resolveai
+docker compose -f deploy/compose.sandbox.yaml up --build -d --wait
+```
 
-## Run the synthetic demo locally
+Open **http://127.0.0.1:8132/projects/resolveai/app/studio**. Choose a preset, change its metrics, run the investigation and inspect its measured stages and evidence-cited result. Try a provider failure or insufficient-evidence scenario. Export a result or compare successive runs. The architecture tab explains the components and version history.
 
-Prerequisites: Python 3.12+, uv, Node.js 22+, and npm. Docker is only required for private database workflows and integration tests.
+![ResolveAI studio](docs/images/demo.png)
+
+The container binds to loopback, runs as a non-root user and has a read-only filesystem. Stop with `docker compose -f deploy/compose.sandbox.yaml stop`. Sandbox runs expire and are lost on restart; this profile stores no private data. It supports one API process. See [self-hosting](docs/v4/SELF_HOST.md) for configuration and HTTPS deployment.
+
+For local source development, install Python 3.12, uv and Node.js 22:
 
 ```sh
 uv sync --frozen
 npm --prefix web ci --ignore-scripts
-npm --prefix web run build
-DEMO_MODE=true uv run uvicorn app.main:app --host 127.0.0.1 --port 8130
-```
-
-Open `http://localhost:8130` and `http://localhost:8130/architecture`. No administrator or model credential is needed. Avoid copying private `.env` files into a public demo instance.
-
-## Run the private test environment
-
-Use a fresh checkout: the configuration script preserves any existing `.env`.
-
-```sh
-uv run python scripts/test_config.py
-docker compose --env-file .env -f deploy/compose.test.yaml up -d --wait
-uv run alembic upgrade head
-uv run python -m app.cli bootstrap --username owner
-uv run uvicorn app.main:app --host 127.0.0.1 --port 8130
+PUBLIC_ORIGIN=http://127.0.0.1:5179 uv run uvicorn app.sandbox.main:app --host 127.0.0.1 --port 8131 --workers 1
 # In another terminal:
-uv run python -m app.jobs.worker
+npm --prefix web run dev
 ```
 
-Sign in at `/login`, register an application and environment, then create a scoped credential. Send the sample event in [API.md](docs/API.md). The test configuration uses disposable local ports 55433–55435; verify they are free first. It disables secure cookies only for loopback HTTP testing. Production must use HTTPS and secure cookies.
+Open `http://127.0.0.1:5179/projects/resolveai/app/studio`.
 
-## What is implemented
+## Private investigation runtime
 
-- Owner sessions, CSRF/origin protection, expiring/revocable source credentials, and signed webhooks.
-- Transactional incident/job acceptance, source-scoped deduplication, leases, heartbeats, fencing, and bounded retries.
-- Restricted PostgreSQL/Redis diagnostics, tested against isolated services and restricted roles/ACLs.
-- Evidence-cited reports, visible uncertainty, audit entries, operator notes, report JSON export, and safe retry.
-- Four synthetic scenarios, responsive UI, and versioned architecture learning views.
-- An optional configured model adapter; live-provider evaluation is explicitly recorded as NOT RUN in this synthetic-only delivery.
+The private runtime includes scoped and revocable credentials, signed webhooks, CSRF-protected owner sessions, transactional job acceptance, deduplication, leases, fencing, bounded retries, audit events and encrypted connector credentials. Diagnostic roles and Redis ACLs restrict what it can read. It does not run arbitrary SQL, shell commands or automatic remediation.
 
-There is no public signup, multi-tenant SaaS, arbitrary SQL/shell/HTTP tool, customer-side collector, autonomous repair, or claim of commercial-scale reliability.
+Follow [deployment](docs/DEPLOYMENT.md), [connector permissions](docs/CONNECTORS.md) and [operations](docs/OPERATIONS.md). Use HTTPS, generated secrets, restricted networking and tested backups before accepting private data. An optional OpenAI-compatible adapter exists; live-provider quality, spend and cross-project live inference have not been validated. The default public studio never enables it.
 
 ## Verify
 
+Tests require disposable PostgreSQL and Redis services. Run from a fresh checkout and confirm ports 55433–55435 are free:
+
 ```sh
-uv run ruff check app tests scripts alembic
-uv run ruff format --check app tests scripts alembic
-uv run mypy app
+uv sync --frozen
+uv run python scripts/test_config.py
+docker compose --env-file .env -f deploy/compose.test.yaml up -d --wait
+uv run alembic upgrade head
 uv run pytest -q
-uv run alembic check
+uv run ruff check app tests scripts alembic
+uv run mypy app
+npm --prefix web ci --ignore-scripts
 npm --prefix web run build
 uv run python scripts/architecture.py --check
 uv run python scripts/scan_source.py
 ```
 
-Run tests only against the dedicated test Compose project. [TEST_REPORT.md](docs/TEST_REPORT.md) records actual results; fixture success is not a live-model benchmark.
+Never point tests or recovery drills at a live database. Architecture snapshots are immutable; runtime changes require a new snapshot and regenerated documentation.
 
-## Learn, deploy, contribute
+## Documentation
 
-- [Architecture](docs/ARCHITECTURE.md) and [versioning](docs/ARCHITECTURE_VERSIONING.md)
-- [Learning map](docs/LEARNING_MAP.md), [agent design](docs/AGENT_DESIGN.md), [data model](docs/DATA_MODEL.md)
-- [Connectors and minimum permissions](docs/CONNECTORS.md)
-- [Deployment](docs/DEPLOYMENT.md), [operations and recovery](docs/OPERATIONS.md)
-- [Threat model](docs/THREAT_MODEL.md), [security controls](docs/SECURITY_CONTROLS.md), [security policy](SECURITY.md)
-- [Manual acceptance checklist](docs/UAT_CHECKLIST.md), [demo scripts](docs/DEMO_VIDEO_SCRIPT.md), [roadmap](docs/ROADMAP.md)
+- [Architecture](docs/ARCHITECTURE.md), [learning map](docs/LEARNING_MAP.md), [data model](docs/DATA_MODEL.md)
+- [API and examples](docs/API.md), [simulation guide](docs/SIMULATION_GUIDE.md)
+- [Threat model](docs/THREAT_MODEL.md), [security policy](SECURITY.md)
+- [Release readiness and tested limits](docs/RELEASE_READINESS.md)
+- [Contributing](CONTRIBUTING.md), [third-party notices](THIRD_PARTY_NOTICES.md)
 
-Licensed under Apache-2.0. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) for dependency and supplied-brand notes. Contributions should follow [CONTRIBUTING.md](CONTRIBUTING.md).
+The [public portfolio demo](https://portfolio.gappazappa.in/projects/resolveai) is a separately deployed integration; its version can differ from this source release. No commercial-scale reliability, independent penetration test or production-remediation capability is claimed. Synthetic model costs are not invoices. Licensed under Apache-2.0.

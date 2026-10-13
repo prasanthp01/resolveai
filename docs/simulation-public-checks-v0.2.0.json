@@ -1,0 +1,110 @@
+{
+  "checks": [
+    {
+      "path": "/simulation",
+      "method": "GET",
+      "status": 200,
+      "result": "PASS"
+    },
+    {
+      "path": "/architecture",
+      "method": "GET",
+      "status": 200,
+      "result": "PASS"
+    },
+    {
+      "path": "/api/v1/config",
+      "method": "GET",
+      "status": 200,
+      "result": "PASS"
+    },
+    {
+      "path": "/api/v1/architecture",
+      "method": "GET",
+      "status": 200,
+      "result": "PASS"
+    },
+    {
+      "path": "/api/v1/architecture/1.0.0",
+      "method": "GET",
+      "status": 200,
+      "result": "PASS"
+    },
+    {
+      "path": "/api/v1/architecture/1.0.1",
+      "method": "GET",
+      "status": 200,
+      "result": "PASS"
+    },
+    {
+      "path": "/api/v1/architecture/1.1.0",
+      "method": "GET",
+      "status": 200,
+      "result": "PASS"
+    },
+    {
+      "path": "/api/v1/demo/scenarios/postgres-saturation/trace",
+      "method": "GET",
+      "status": 200,
+      "result": "PASS"
+    },
+    {
+      "path": "/api/v1/demo/scenarios/release-regression/trace",
+      "method": "GET",
+      "status": 200,
+      "result": "PASS"
+    },
+    {
+      "path": "/api/v1/demo/scenarios/redis-pressure/trace",
+      "method": "GET",
+      "status": 200,
+      "result": "PASS"
+    },
+    {
+      "path": "/api/v1/demo/scenarios/provider-limits/trace",
+      "method": "GET",
+      "status": 200,
+      "result": "PASS"
+    },
+    {
+      "path": "/api/v1/demo/scenarios/unknown/trace",
+      "method": "GET",
+      "status": 404,
+      "result": "PASS"
+    },
+    {
+      "path": "/api/v1/incidents",
+      "method": "GET",
+      "status": 404,
+      "result": "PASS"
+    },
+    {
+      "path": "/api/v1/events",
+      "method": "POST",
+      "status": 403,
+      "result": "PASS"
+    },
+    {
+      "path": "/health/live",
+      "method": "GET",
+      "status": 200,
+      "result": "PASS"
+    },
+    {
+      "path": "/health/ready",
+      "method": "GET",
+      "status": 200,
+      "result": "PASS"
+    },
+    {
+      "path": "/release-manifest.json",
+      "method": "GET",
+      "status": 200,
+      "result": "PASS"
+    }
+  ],
+  "security_headers": "PASS",
+  "synthetic_only": "PASS",
+  "application_version": "0.2.0",
+  "architecture_version": "1.1.0"
+}

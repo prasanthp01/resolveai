@@ -1,0 +1,304 @@
+{
+  "schema_version": "1.0.0",
+  "app_version": "0.3.0",
+  "slug": "postgres-saturation",
+  "title": "Payment API connection saturation",
+  "recording": {
+    "recorded_at": "2026-10-13T11:15:01.959108+00:00",
+    "mode": "verified-synthetic-replay",
+    "method": "Real FastAPI handlers via ASGITransport and PostgreSQL; worker claim, gather and complete invoked individually. Fixture evidence; no model or external connector calls.",
+    "code_fingerprint": "7fd798ebd1924278714a271a03b4fc53f3f2df24808bd31a15530ad8ede0c12c",
+    "timing_note": "Timestamps are from the local capture. Replay pacing is a teaching aid, not a latency benchmark."
+  },
+  "request": {
+    "method": "POST",
+    "path": "/api/v1/events",
+    "headers": {
+      "Authorization": "Bearer <integration-token>",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "event_id": "simulation-postgres-saturation",
+      "service": "payment-api",
+      "error_rate": 32,
+      "message": "Checkout requests time out while database connections approach their configured limit.",
+      "mode": "fixture",
+      "scenario": "postgres-saturation"
+    }
+  },
+  "accepted": {
+    "http_status": 202,
+    "request_id": "a1f6f5c4-a2ff-4c99-8236-256b2b9c2750",
+    "body": {
+      "id": "12562952-1b3a-461e-8701-771296bc734f",
+      "status": "QUEUED",
+      "duplicate": false
+    }
+  },
+  "states": {
+    "queued": {
+      "incident_id": "12562952-1b3a-461e-8701-771296bc734f",
+      "incident_status": "QUEUED",
+      "severity": "HIGH",
+      "job_id": "96e9cd72-3946-476d-bdfc-497d3f0eb6f0",
+      "job_status": "PENDING",
+      "attempts": 0,
+      "claim_version": 0,
+      "lease_until": null
+    },
+    "claimed": {
+      "incident_id": "12562952-1b3a-461e-8701-771296bc734f",
+      "incident_status": "INVESTIGATING",
+      "severity": "HIGH",
+      "job_id": "96e9cd72-3946-476d-bdfc-497d3f0eb6f0",
+      "job_status": "CLAIMED",
+      "attempts": 1,
+      "claim_version": 1,
+      "lease_until": "2026-10-13T11:16:01.874019+00:00"
+    },
+    "completed": {
+      "incident_id": "12562952-1b3a-461e-8701-771296bc734f",
+      "incident_status": "REPORT_READY",
+      "severity": "HIGH",
+      "job_id": "96e9cd72-3946-476d-bdfc-497d3f0eb6f0",
+      "job_status": "SUCCEEDED",
+      "attempts": 1,
+      "claim_version": 1,
+      "lease_until": null
+    }
+  },
+  "claim": {
+    "id": "96e9cd72-3946-476d-bdfc-497d3f0eb6f0",
+    "incident_id": "12562952-1b3a-461e-8701-771296bc734f",
+    "version": 1,
+    "owner": "simulation-worker",
+    "run_id": "eff33c5e-16dd-4ce8-a1b9-e1e556ac0864",
+    "attempt": 1
+  },
+  "evidence": [
+    {
+      "id": "5cfe71fa-5bf7-4a0f-b66d-10f02fb30121",
+      "source": "postgres.metrics",
+      "data": {
+        "connections": 96,
+        "max_connections": 100,
+        "waiting": 31
+      },
+      "observed_at": "2026-10-13T11:15:01.791322+00:00"
+    },
+    {
+      "id": "d34e0256-d2d4-42a2-9848-c32395f3c322",
+      "source": "application.metrics",
+      "data": {
+        "db_timeout_count": 84,
+        "p95_ms": 4200,
+        "error_rate": 32
+      },
+      "observed_at": "2026-10-13T11:15:01.791322+00:00"
+    },
+    {
+      "id": "51a44761-079c-4285-9c55-280d95e07e4e",
+      "source": "deployment.events",
+      "data": {
+        "recent_deployment": false,
+        "upstream_429": 0
+      },
+      "observed_at": "2026-10-13T11:15:01.791322+00:00"
+    }
+  ],
+  "analysis": {
+    "report": {
+      "summary": "payment-api: Evidence supports database connection pressure.",
+      "severity": "HIGH",
+      "impact": "32% reported error rate; affected user count is unknown.",
+      "hypotheses": [
+        {
+          "title": "Database connection pressure",
+          "rationale": "Observed connections approach the configured database limit. Correlate with application-side timeouts; this alone does not prove pool exhaustion.",
+          "evidence_ids": [
+            "5cfe71fa-5bf7-4a0f-b66d-10f02fb30121"
+          ]
+        }
+      ],
+      "supporting_evidence_ids": [
+        "5cfe71fa-5bf7-4a0f-b66d-10f02fb30121"
+      ],
+      "contradicting_evidence_ids": [],
+      "uncertainty": "Synthetic evidence and deterministic analysis do not establish a production root cause. Alternative causes remain possible.",
+      "recommended_next_steps": [
+        "Compare the incident time window against independent application telemetry.",
+        "Have an operator review the evidence and proposed response before making changes."
+      ],
+      "investigation_mode": "fixture",
+      "started_at": "2026-10-13T11:15:01.878168+00:00",
+      "completed_at": "2026-10-13T11:15:01.889880+00:00"
+    },
+    "citations_validated": true,
+    "live_model_called": false
+  },
+  "final_response": {
+    "http_status": 200,
+    "request_id": "a492c27c-3b80-4357-ba89-8fb18a934c49",
+    "body": {
+      "status": "REPORT_READY",
+      "report": {
+        "summary": "payment-api: Evidence supports database connection pressure.",
+        "severity": "HIGH",
+        "impact": "32% reported error rate; affected user count is unknown.",
+        "hypotheses": [
+          {
+            "title": "Database connection pressure",
+            "rationale": "Observed connections approach the configured database limit. Correlate with application-side timeouts; this alone does not prove pool exhaustion.",
+            "evidence_ids": [
+              "5cfe71fa-5bf7-4a0f-b66d-10f02fb30121"
+            ]
+          }
+        ],
+        "supporting_evidence_ids": [
+          "5cfe71fa-5bf7-4a0f-b66d-10f02fb30121"
+        ],
+        "contradicting_evidence_ids": [],
+        "uncertainty": "Synthetic evidence and deterministic analysis do not establish a production root cause. Alternative causes remain possible.",
+        "recommended_next_steps": [
+          "Compare the incident time window against independent application telemetry.",
+          "Have an operator review the evidence and proposed response before making changes."
+        ],
+        "investigation_mode": "fixture",
+        "started_at": "2026-10-13T11:15:01.878168+00:00",
+        "completed_at": "2026-10-13T11:15:01.889880+00:00"
+      },
+      "evidence": [
+        {
+          "id": "5cfe71fa-5bf7-4a0f-b66d-10f02fb30121",
+          "source": "postgres.metrics",
+          "data": {
+            "connections": 96,
+            "max_connections": 100,
+            "waiting": 31
+          },
+          "observed_at": "2026-10-13T11:15:01.791322+00:00"
+        },
+        {
+          "id": "d34e0256-d2d4-42a2-9848-c32395f3c322",
+          "source": "application.metrics",
+          "data": {
+            "db_timeout_count": 84,
+            "p95_ms": 4200,
+            "error_rate": 32
+          },
+          "observed_at": "2026-10-13T11:15:01.791322+00:00"
+        },
+        {
+          "id": "51a44761-079c-4285-9c55-280d95e07e4e",
+          "source": "deployment.events",
+          "data": {
+            "recent_deployment": false,
+            "upstream_429": 0
+          },
+          "observed_at": "2026-10-13T11:15:01.791322+00:00"
+        }
+      ]
+    }
+  },
+  "audit": [
+    {
+      "id": "9a1b3607-8b6c-47b9-a85d-9db3b7120e7e",
+      "actor": "80df170e-bbce-47f6-8ec1-f6ac6d654e45",
+      "action": "INCIDENT_ACCEPTED",
+      "details": {
+        "status": "QUEUED"
+      },
+      "created_at": "2026-10-13T11:15:01.817514+00:00"
+    },
+    {
+      "id": "6228e306-6ca3-4e72-8981-e839fa26dd6d",
+      "actor": "simulation-worker",
+      "action": "JOB_CLAIMED",
+      "details": {
+        "claim_version": 1,
+        "attempt": 1
+      },
+      "created_at": "2026-10-13T11:15:01.880598+00:00"
+    },
+    {
+      "id": "8071254c-8d16-4c6b-a3c1-24c24f1b1df0",
+      "actor": "simulation-worker",
+      "action": "REPORT_SAVED",
+      "details": {
+        "status": "REPORT_READY",
+        "evidence_count": 3,
+        "connector_steps": [],
+        "mode": "fixture"
+      },
+      "created_at": "2026-10-13T11:15:01.898002+00:00"
+    }
+  ],
+  "edge_cases": {
+    "duplicate": {
+      "http_status": 200,
+      "request_id": "04fe07a0-a9f0-4206-b1d2-0d1d600e0c90",
+      "body": {
+        "id": "12562952-1b3a-461e-8701-771296bc734f",
+        "status": "QUEUED",
+        "duplicate": true
+      }
+    },
+    "conflict": {
+      "http_status": 409,
+      "request_id": "78ef7935-94b6-42d1-8d75-4b86a4a35a2a",
+      "body": {
+        "code": "409",
+        "message": "Event ID reused with a different payload",
+        "request_id": "78ef7935-94b6-42d1-8d75-4b86a4a35a2a"
+      }
+    },
+    "invalid": {
+      "http_status": 422,
+      "request_id": "be551f26-d59f-4af8-ba4f-83322c46eea3",
+      "body": {
+        "code": "VALIDATION_ERROR",
+        "message": "Invalid request fields",
+        "fields": [
+          {
+            "field": "body.error_rate",
+            "type": "less_than_equal"
+          }
+        ],
+        "request_id": "be551f26-d59f-4af8-ba4f-83322c46eea3"
+      }
+    },
+    "unauthorized": {
+      "http_status": 401,
+      "request_id": "08d5f45c-5ea7-44d8-be1c-ff5345684dab",
+      "body": {
+        "code": "401",
+        "message": "Integration token required",
+        "request_id": "08d5f45c-5ea7-44d8-be1c-ff5345684dab"
+      }
+    },
+    "unchanged_counts": {
+      "incidents_before": 1,
+      "incidents_after": 1,
+      "jobs_after": 1
+    },
+    "invalid_citation_rejected": true,
+    "lease_recovery": {
+      "fault": "Test harness forced the first worker lease into the past on a separate synthetic incident.",
+      "old_claim_version": 1,
+      "new_claim_version": 2,
+      "stale_worker_saved": false,
+      "replacement_worker_saved": true,
+      "persisted_report_count": 1,
+      "final_state": {
+        "incident_id": "040e0f14-111a-483a-a929-9fe35434bb6f",
+        "incident_status": "REPORT_READY",
+        "severity": "HIGH",
+        "job_id": "ebbfd1ec-ae9d-41c6-8639-71028d59ca63",
+        "job_status": "SUCCEEDED",
+        "attempts": 2,
+        "claim_version": 2,
+        "lease_until": null
+      }
+    }
+  }
+}

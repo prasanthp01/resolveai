@@ -45,15 +45,20 @@ export async function api<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const response = await fetch("/api/v1" + path, {
-    credentials: "same-origin",
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      "X-CSRF-Token": sessionStorage.getItem("csrf") || "",
-      ...options.headers,
+  const response = await fetch(
+    (location.pathname.startsWith("/projects/resolveai")
+      ? "/api/projects/resolveai/v1"
+      : "/api/v1") + path,
+    {
+      credentials: "same-origin",
+      ...options,
+      headers: {
+        "Content-Type": "application/json",
+        "X-CSRF-Token": sessionStorage.getItem("csrf") || "",
+        ...options.headers,
+      },
     },
-  });
+  );
   const data = await response.json();
   if (!response.ok) throw new Error(data.message || "Request failed");
   return data;

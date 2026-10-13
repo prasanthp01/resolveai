@@ -1,0 +1,12 @@
+{
+  "verified_at": "2026-10-13T10:49:55.795590+00:00",
+  "scope": "isolated local private test database",
+  "backup_sha256": "98658872392e60bc6edd62a8db5da36e7d7d6b9b05292d30f480b4dde792e8ad",
+  "backup_bytes": 34268,
+  "table_count": 15,
+  "row_count": 22,
+  "migration": "3c57cd3d805f",
+  "restore_matches_source": true,
+  "original_unchanged": true,
+  "result": "PASS"
+}

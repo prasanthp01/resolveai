@@ -1,0 +1,8 @@
+{
+  "verified_at": "2026-10-13T11:30:58.369950+00:00",
+  "status": "PASS",
+  "environment": "local release container restarted through Docker",
+  "previous_session_status": 401,
+  "new_session_old_run_status": 404,
+  "behavior": "Ephemeral runs and signed sessions intentionally do not survive a process restart."
+}

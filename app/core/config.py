@@ -6,6 +6,8 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
     database_url: str = "postgresql+asyncpg://resolveai_app:unset@127.0.0.1:55433/resolveai"
     demo_mode: bool = True
+    api_prefix: str = "/api/v1"
+    cookie_path: str = "/"
     public_origin: str = "http://localhost:8130"
     cookie_secure: bool = True
     connector_key: str = ""
@@ -14,6 +16,12 @@ class Settings(BaseSettings):
     llm_api_key: str = ""
     llm_model: str = ""
     llm_daily_requests: int = 20
+    llm_provider: str = "openai_compatible"
+    llm_base_url: str = "https://api.openai.com/v1"
+    agentops_url: str = ""
+    agentops_token: str = ""
+    agentops_policy_version: str = "policy-2026-10-v1"
+    agentops_environment: str = "staging"
     build_sha: str = "development"
 
 

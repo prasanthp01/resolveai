@@ -1,0 +1,34 @@
+name: resolveai-sandbox
+services:
+  sandbox:
+    image: ${RESOLVEAI_IMAGE:-resolveai:local}
+    build:
+      context: ..
+    command: [".venv/bin/uvicorn", "app.sandbox.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--no-access-log", "--no-proxy-headers", "--limit-concurrency", "48", "--timeout-keep-alive", "5"]
+    environment:
+      PUBLIC_ORIGIN: ${PUBLIC_ORIGIN:-http://127.0.0.1:${RESOLVEAI_SANDBOX_PORT:-8132}}
+      BUILD_SHA: ${BUILD_SHA:-development}
+      DEMO_MODE: 'true'
+      LLM_ENABLED: 'false'
+    ports: ["127.0.0.1:${RESOLVEAI_SANDBOX_PORT:-8132}:8000"]
+    networks: [sandbox, ingress]
+    mem_limit: 192m
+    cpus: 0.35
+    pids_limit: 80
+    read_only: true
+    tmpfs: ["/tmp:size=8m"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", ".venv/bin/python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/ready', timeout=2)"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    logging:
+      driver: json-file
+      options: {max-size: "3m", max-file: "2"}
+networks:
+  sandbox:
+    internal: true
+  ingress: {}

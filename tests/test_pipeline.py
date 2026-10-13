@@ -2,11 +2,13 @@ import asyncio
 import hashlib
 import hmac
 import json
+import os
 import secrets
 import time
 from datetime import timedelta
 from pathlib import Path
 from types import SimpleNamespace
+from urllib.parse import urlsplit
 import asyncpg
 import pytest
 from redis.asyncio import Redis
@@ -21,6 +23,9 @@ from app.jobs.worker import run_once, claim, heartbeat, complete, fail
 from app.connectors.gateway import execute, destination, PolicyDenied
 from app.agents.investigate import scenarios, recorded_report, validate_report, severity
 from app.schemas.contracts import IncidentCreate
+
+DIAGNOSTIC_PG_PORT = int(os.getenv("RESOLVEAI_TEST_DIAGNOSTIC_PG_PORT", "55434"))
+DIAGNOSTIC_REDIS_PORT = int(os.getenv("RESOLVEAI_TEST_REDIS_PORT", "55435"))
 
 PAYLOAD = {
     "event_id": "event-001",
@@ -270,7 +275,7 @@ async def test_request_budget():
         ("169.254.169.254", 80),
         ("example.com", 443),
         ("10.0.0.1", 5432),
-        ("127.0.0.1", 55433),
+        (urlsplit(settings().database_url).hostname, urlsplit(settings().database_url).port or 5432),
         ("0.0.0.0", 80),
         ("::1", 5432),
     ],
@@ -326,11 +331,9 @@ async def test_ambiguous_and_adversarial_evaluation():
 
 
 async def test_real_postgres_and_redis_diagnostics():
-    from urllib.parse import urlsplit
-
     password = urlsplit(settings().database_url.replace("postgresql+asyncpg", "postgresql")).password
     pg = await asyncpg.connect(
-        host="127.0.0.1", port=55434, user="postgres", password=password, database="postgres"
+        host="127.0.0.1", port=DIAGNOSTIC_PG_PORT, user="postgres", password=password, database="postgres"
     )
     monitor_password = secrets.token_hex(24)
     if await pg.fetchval("SELECT 1 FROM pg_roles WHERE rolname='resolveai_monitor'"):
@@ -344,7 +347,7 @@ async def test_real_postgres_and_redis_diagnostics():
         enabled=True,
         environment_id="a",
         host="127.0.0.1",
-        port=55434,
+        port=DIAGNOSTIC_PG_PORT,
         username="resolveai_monitor",
         secret=encrypt(monitor_password),
         database="postgres",
@@ -353,12 +356,16 @@ async def test_real_postgres_and_redis_diagnostics():
     assert (await execute(c, "health", "a"))["data"]["available"]
     assert (await execute(c, "connections", "a"))["data"]["connections"] > 0
     restricted = await asyncpg.connect(
-        host="127.0.0.1", port=55434, user="resolveai_monitor", password=monitor_password, database="postgres"
+        host="127.0.0.1",
+        port=DIAGNOSTIC_PG_PORT,
+        user="resolveai_monitor",
+        password=monitor_password,
+        database="postgres",
     )
     with pytest.raises(asyncpg.PostgresError):
         await restricted.execute("CREATE TABLE forbidden_probe (id int)")
     await restricted.close()
-    redis = Redis(host="127.0.0.1", port=55435, decode_responses=True)
+    redis = Redis(host="127.0.0.1", port=DIAGNOSTIC_REDIS_PORT, decode_responses=True)
     await redis.execute_command(
         "ACL",
         "SETUSER",
@@ -372,14 +379,14 @@ async def test_real_postgres_and_redis_diagnostics():
     )
     await redis.aclose()
     c.kind = "redis"
-    c.port = 55435
+    c.port = DIAGNOSTIC_REDIS_PORT
     assert (await execute(c, "health", "a"))["data"]["available"]
     assert "used_memory" in (await execute(c, "memory", "a"))["data"]
     for operation in ["GET", "KEYS", "SCAN", "CONFIG", "FLUSHALL", "EVAL"]:
         with pytest.raises(PolicyDenied):
             await execute(c, operation, "a")
     restricted_redis = Redis(
-        host="127.0.0.1", port=55435, username="resolveai_monitor", password=monitor_password
+        host="127.0.0.1", port=DIAGNOSTIC_REDIS_PORT, username="resolveai_monitor", password=monitor_password
     )
     with pytest.raises(Exception):
         await restricted_redis.get("private-key")
@@ -508,3 +515,31 @@ def test_redaction_of_json_credential_fields():
     cleaned = json.loads(redact(payload))
     assert cleaned["nested"] == {"password": "[REDACTED]", "api_key": "[REDACTED]"}
     assert cleaned["count"] == 4
+
+
+async def test_agentops_failure_preserves_incident_and_deterministic_evidence(context, monkeypatch):
+    from app.jobs import worker
+    from app.agents.routing import AIUnavailable
+    from app.models.incident import Usage
+
+    accepted = await send(context, PAYLOAD | {"mode": "live", "scenario": None})
+    incident_id = accepted.json()["id"]
+    cfg = settings()
+    previous = (cfg.llm_enabled, cfg.llm_provider)
+    cfg.llm_enabled, cfg.llm_provider = True, "agentops"
+
+    async def unavailable(*args):
+        raise AIUnavailable("AI_UNAVAILABLE", "Synthetic routing only")
+
+    monkeypatch.setattr(worker, "live_report", unavailable)
+    try:
+        assert await run_once()
+        async with Session() as db:
+            incident = await db.get(Incident, incident_id)
+            report = await db.scalar(select(Report).where(Report.incident_id == incident_id))
+            usage = await db.scalar(select(Usage).where(Usage.incident_id == incident_id))
+            assert incident.status == "NEEDS_REVIEW"
+            assert report.data["investigation_mode"] == "needs_configuration"
+            assert usage.status == "AI_UNAVAILABLE" and usage.tokens is None
+    finally:
+        cfg.llm_enabled, cfg.llm_provider = previous

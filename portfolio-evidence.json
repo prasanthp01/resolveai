@@ -1,0 +1,147 @@
+{
+  "schema_version": "1.0",
+  "slug": "resolveai",
+  "title": "ResolveAI incident investigation studio",
+  "git_revision": "b65b9ad18915272eab24b8291701585ed8a81551",
+  "status": "DEPLOYED",
+  "environment": "production",
+  "public_route": "/projects/resolveai",
+  "deployment_url": "https://portfolio.gappazappa.in/projects/resolveai#simulation",
+  "last_verified_at": "2026-10-13T16:57:02.081Z",
+  "simulation": {
+    "mode": "SANDBOX_DETERMINISTIC",
+    "provenance": {
+      "data_origin": "SYNTHETIC",
+      "connector_kind": "MOCK",
+      "app_version": "0.3.5",
+      "fixtures_version": "2.0.0",
+      "rules_version": "2.0.0",
+      "workflow_version": "1.0.0",
+      "model_version": "none",
+      "prompt_version": "none",
+      "source_revision": "b65b9ad18915272eab24b8291701585ed8a81551"
+    },
+    "input_schema_sha256": "5f5f5e8e4151ad1e839d85e215692e46dd793074de02a6bcac2a792047f693d1"
+  },
+  "tests": [
+    {
+      "name": "Complete backend suite",
+      "status": "PASS",
+      "command": ".venv/bin/pytest tests -q --tb=short --junitxml=docs/adoption-0.3.5/backend-tests.xml",
+      "evidence": {
+        "evidence_id": "complete-backend-suite",
+        "origin": "TEST",
+        "reference": "docs/adoption-0.3.5/backend-tests.xml",
+        "sha256": "568663fdfff29414ee7d2840c1fe5ca9547fe512192ca0da2e6877992bd5ecc4"
+      },
+      "conditions": "151 tests passed against disposable PostgreSQL/Redis on isolated loopback ports. Includes canonical semantic validation and immutable historical recordings.",
+      "executed_at": "2026-10-13T16:14:29.717332Z"
+    },
+    {
+      "name": "Real HTTP simulator boundary",
+      "status": "PASS",
+      "command": ".venv/bin/python scripts/check_contract_adoption.py --expected-sha b65b9ad18915272eab24b8291701585ed8a81551",
+      "evidence": {
+        "evidence_id": "real-http-simulator-boundary",
+        "origin": "TEST",
+        "reference": "docs/adoption-0.3.5/http-contracts.json",
+        "sha256": "38386634cb42856c0643e08b2a8d7d2294add080b1d56056d7eefb5893ee1d25"
+      },
+      "conditions": "Nine local HTTP runs: two inputs repeated, four controlled faults, cancellation, canonical result/event semantics, cookie ownership and SSE/poll replay. All actual provider calls are zero.",
+      "executed_at": "2026-10-13T16:14:29.717332Z"
+    },
+    {
+      "name": "Frontend build",
+      "status": "PASS",
+      "command": "VITE_APP_BASE=/projects/resolveai/app/ npm --prefix web run build",
+      "evidence": {
+        "evidence_id": "frontend-build",
+        "origin": "TEST",
+        "reference": "docs/adoption-0.3.5/frontend-build.txt",
+        "sha256": "9626eecbc096796efda208098f77c3b6f9b510151dd8f9c4bdad36c7bc5b5d5a"
+      },
+      "conditions": "TypeScript, 7 event checks, 11 outcome checks, 165 historical assertions, 44 diagrams, full app/widget builds and widget lifecycle checks.",
+      "executed_at": "2026-10-13T16:14:29.717332Z"
+    },
+    {
+      "name": "Built widget warning display",
+      "status": "PASS",
+      "command": "CUA: connector timeout, visible canonical JSON, technical explanations and 375px mobile inspection",
+      "evidence": {
+        "evidence_id": "built-widget-warning-display",
+        "origin": "TEST",
+        "reference": "docs/adoption-0.3.5/browser-checks.json",
+        "sha256": "09b9b46dba321baf9cc34ecb70168981fb5c941688085cc99a49bcfc123d2835"
+      },
+      "conditions": "Local built widget displays retained diagnostics with SUCCEEDED and errors empty. No console warning/error observed. Not a public Portfolio deployment check. Visual capture is a5b62d2; widget/application source is byte-identical in final b65b9ad. Final HTTP checks were repeated.",
+      "executed_at": "2026-10-13T16:14:29.717332Z"
+    },
+    {
+      "name": "Source and architecture checks",
+      "status": "PASS",
+      "command": "Ruff, mypy, architecture consistency/history and widget admission regression",
+      "evidence": {
+        "evidence_id": "source-and-architecture-checks",
+        "origin": "TEST",
+        "reference": "docs/adoption-0.3.5/release-checks.json",
+        "sha256": "57c53cbaed7fc204e639bf2410f2466971916ee281488dd4d1bd191d544c7fd0"
+      },
+      "conditions": "Application 0.3.5 and architecture 2.0.7; ten prior architecture snapshots preserved. Source-hygiene check is recorded separately at commit time.",
+      "executed_at": "2026-10-13T16:14:29.717332Z"
+    },
+    {
+      "name": "Release image and public deployment",
+      "status": "PASS",
+      "command": ".venv/bin/python docs/deployment-0.3.5/public_smoke.py",
+      "evidence": {
+        "evidence_id": "release-image-and-public-deployment",
+        "origin": "TEST",
+        "reference": "docs/deployment-0.3.5/deployment.json",
+        "sha256": "bcc8330f0584b50955bfc88876e2fb3be3c534f972f10bfa94b5143cb69bd683"
+      },
+      "conditions": "Pinned 0.3.5 image deployed to the public demonstration host; 68 HTTPS checks and production widget browser verification passed. No external provider calls or private service integration.",
+      "executed_at": "2026-10-13T16:57:02.081Z"
+    },
+    {
+      "name": "Real cross-service edges",
+      "status": "NOT_TESTED",
+      "command": "NOT RUN for 0.3.5",
+      "evidence": {
+        "evidence_id": "real-cross-service-edges",
+        "origin": "TEST",
+        "reference": "docs/adoption-0.3.5/release-checks.json",
+        "sha256": "57c53cbaed7fc204e639bf2410f2466971916ee281488dd4d1bd191d544c7fd0"
+      },
+      "conditions": "FlowOps failure ingestion, authorized KnowledgeOps lookup, live AgentOps inference/usage and investigation-completed delivery remain unimplemented or stubbed.",
+      "executed_at": "2026-10-13T16:14:29.717332Z"
+    }
+  ],
+  "benchmarks": [],
+  "costs": [
+    {
+      "category": "PROVIDER",
+      "cost": {
+        "kind": "NONE",
+        "value": 0,
+        "currency": "USD",
+        "pricing_version": "no-provider-calls"
+      },
+      "method": "All nine actual local HTTP runs reported zero provider calls and NONE cost. Hosting and development costs are not allocated.",
+      "evidence": {
+        "evidence_id": "actual-http-zero-provider",
+        "origin": "TEST",
+        "reference": "docs/adoption-0.3.5/http-contracts.json",
+        "sha256": "38386634cb42856c0643e08b2a8d7d2294add080b1d56056d7eefb5893ee1d25"
+      }
+    }
+  ],
+  "skills": [],
+  "limits": [
+    "Public 0.3.5 synthetic sandbox and shared widget verified; exact-image vulnerability scanning, live inference and production capacity benchmarking NOT RUN.",
+    "Canonical simulator boundary only; no real FlowOps, KnowledgeOps or AgentOps service-to-service edge is connected.",
+    "Single-process temporary sessions/runs; restart invalidates them. No durable public admission or remediation.",
+    "Synthetic rule outcomes do not measure live-model performance, real diagnostic accuracy or production capacity.",
+    "Historical backend recordings preserve original 0.3.0 versions and byte hashes; they are compatibility artifacts, not current execution captures.",
+    "Independent Quality re-review and owner acceptance of this release are NOT RUN. Integration independently passed implementation 8c5178e; the exact release SHA has separate local verification."
+  ]
+}

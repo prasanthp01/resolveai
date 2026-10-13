@@ -1,0 +1,10 @@
+[
+ {"name":"below-connection-threshold", "input":{"db_connections":84,"log_fixture":"normal"},"expected":[]},
+ {"name":"connection-threshold", "input":{"db_connections":85},"expected":["Database connection pressure"]},
+ {"name":"slow-with-locks", "input":{"db_connections":40,"slow_queries":3,"db_lock_waiters":2,"db_cpu_percent":25,"latency_ms":1200,"log_fixture":"query_timeout"},"expected":["Slow queries or lock contention"]},
+ {"name":"slow-without-latency", "input":{"db_connections":40,"slow_queries":3,"db_lock_waiters":2,"latency_ms":50},"expected":[]},
+ {"name":"cache-high-without-evictions", "input":{"db_connections":40,"redis_memory_mb":1000,"redis_evictions":0},"expected":[]},
+ {"name":"cache-and-rate-limit", "input":{"db_connections":40,"redis_memory_mb":1000,"redis_evictions":2,"upstream_429":9},"expected":["Redis memory pressure","Upstream rate limiting"]},
+ {"name":"deployment-without-increase", "input":{"db_connections":40,"recent_deployment":true,"error_rate":4,"previous_error_rate":2},"expected":[]},
+ {"name":"release-threshold", "input":{"db_connections":40,"recent_deployment":true,"error_rate":7,"previous_error_rate":2},"expected":["Release-related regression"]}
+]

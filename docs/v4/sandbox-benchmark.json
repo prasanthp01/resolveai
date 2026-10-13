@@ -1,0 +1,22 @@
+{
+  "measured_at": "2026-10-13T11:15:06.611631+00:00",
+  "application_version": "0.3.0",
+  "environment": "local ASGI transport; not a public-VPS or network benchmark",
+  "machine": "arm64",
+  "cpu_count": 10,
+  "runs": 24,
+  "concurrency": 4,
+  "failures": 0,
+  "elapsed_seconds": 3.443,
+  "throughput_runs_per_second": 6.97,
+  "p50_ms": 560.344,
+  "p95_ms": 562.609,
+  "admission_p95_ms": 9.066,
+  "queue_wait": "not applicable: bounded admission, no sandbox queue",
+  "checkpoint_pacing_ms_per_stage": 60,
+  "cpu_seconds": 0.14,
+  "peak_rss_mib": 56.86,
+  "external_model_spend_usd": 0,
+  "hosting_cost_per_run": "not measured",
+  "result": "PASS"
+}

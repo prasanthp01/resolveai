@@ -1,0 +1,28 @@
+{
+  "verified_at": "2026-10-13T11:43:47.349248Z",
+  "source_revision": "19d14e039eb446110147eff0a2cf80268f5d7de2",
+  "environment": "Local browser, release container through Nginx on loopback 8133",
+  "status": "PASS",
+  "checks": {
+    "editable_form": "PASS",
+    "editable_json": "PASS in development preview",
+    "real_server_steps": "PASS: 18 events / 9 stages",
+    "plain_and_technical_views": "PASS",
+    "invalid_input_preserved": "PASS: error rate 120 rejected with 422",
+    "changed_input": "PASS: database connections 20 and normal logs produced insufficient evidence",
+    "previous_run_comparison": "PASS",
+    "connector_timeout": "PASS: partial diagnostic result in development preview",
+    "responsive_widths": [
+      320,
+      375,
+      430,
+      768,
+      1280,
+      1440
+    ],
+    "architecture": "PASS: 2.0.1 HLD and LLD, five version options"
+  },
+  "console_scope": "Earlier dev hot-reload errors from stale state resolved after reload. No built-release-origin console error observed.",
+  "independent_review": "NOT_TESTED",
+  "screenshots": "docs/v4/screenshots"
+}

@@ -9,11 +9,13 @@ from app.agents.investigate import severity
 
 
 async def ingest(db, credential, payload):
+    # Rollback expires ORM objects; keep the identity available for a raced insert.
+    source_id = credential.id
     # Omitted timestamps must not defeat retries of otherwise identical event bodies.
     canonical = payload.model_dump(mode="json", exclude_unset=True)
     hashed = hashlib.sha256(json.dumps(canonical, sort_keys=True).encode()).hexdigest()
     old = await db.scalar(
-        select(Incident).where(Incident.source_id == credential.id, Incident.event_id == payload.event_id)
+        select(Incident).where(Incident.source_id == source_id, Incident.event_id == payload.event_id)
     )
     if old:
         if old.payload_hash != hashed:
@@ -23,7 +25,7 @@ async def ingest(db, credential, payload):
         raise HTTPException(429, "Incident storage limit reached; run retention maintenance")
     incident = Incident(
         id=uid(),
-        source_id=credential.id,
+        source_id=source_id,
         environment_id=credential.environment_id,
         event_id=payload.event_id,
         payload_hash=hashed,
@@ -42,7 +44,7 @@ async def ingest(db, credential, payload):
         db.add(
             Audit(
                 incident_id=incident.id,
-                actor=credential.id,
+                actor=source_id,
                 action="INCIDENT_ACCEPTED",
                 details={"status": "QUEUED"},
             )
@@ -51,7 +53,7 @@ async def ingest(db, credential, payload):
     except IntegrityError:
         await db.rollback()
         old = await db.scalar(
-            select(Incident).where(Incident.source_id == credential.id, Incident.event_id == payload.event_id)
+            select(Incident).where(Incident.source_id == source_id, Incident.event_id == payload.event_id)
         )
         if old and old.payload_hash == hashed:
             return old, False

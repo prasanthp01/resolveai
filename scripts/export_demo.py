@@ -8,7 +8,8 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
-from app.main import demo_list, demo_scenario, architecture, architecture_version  # noqa: E402
+from app.main import demo_list, demo_scenario, simulation_trace, architecture, architecture_version  # noqa: E402
+from app.version import APP_VERSION  # noqa: E402
 
 
 async def export(destination):
@@ -27,7 +28,7 @@ async def export(destination):
         "api/v1/config",
         {
             "demo": True,
-            "version": "0.1.0",
+            "version": APP_VERSION,
             "build_sha": index.get("source_commit", "see-architecture"),
             "live_ai_enabled": False,
         },
@@ -35,6 +36,7 @@ async def export(destination):
     write("api/v1/demo/scenarios", await demo_list())
     for s in await demo_list():
         write("api/v1/demo/scenarios/" + s["slug"], await demo_scenario(s["slug"]))
+        write("api/v1/demo/scenarios/" + s["slug"] + "/trace", await simulation_trace(s["slug"]))
     write("api/v1/architecture", index)
     for v in index["versions"]:
         write("api/v1/architecture/" + v["version"], await architecture_version(v["version"]))

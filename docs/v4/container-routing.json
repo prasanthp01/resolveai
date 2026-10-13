@@ -1,0 +1,130 @@
+{
+  "verified_at": "2026-10-13T11:27:41.876503+00:00",
+  "environment": "local Colima Linux amd64 release image behind isolated Nginx; not VPS HTTPS",
+  "app_version": "0.3.0",
+  "architecture": "2.0.1",
+  "status": "PASS",
+  "checks": [
+    {
+      "name": "prefixed SPA deep link",
+      "status": "PASS"
+    },
+    {
+      "name": "static security headers",
+      "status": "PASS"
+    },
+    {
+      "name": "prefixed static assets",
+      "status": "PASS"
+    },
+    {
+      "name": "approved logo",
+      "status": "PASS"
+    },
+    {
+      "name": "architecture deep link",
+      "status": "PASS"
+    },
+    {
+      "name": "versioned architecture",
+      "status": "PASS"
+    },
+    {
+      "name": "architecture 2.0.1",
+      "status": "PASS"
+    },
+    {
+      "name": "architecture 2.0.0",
+      "status": "PASS"
+    },
+    {
+      "name": "architecture 1.1.0",
+      "status": "PASS"
+    },
+    {
+      "name": "architecture 1.0.1",
+      "status": "PASS"
+    },
+    {
+      "name": "architecture 1.0.0",
+      "status": "PASS"
+    },
+    {
+      "name": "scoped session",
+      "status": "PASS"
+    },
+    {
+      "name": "POST admission",
+      "status": "PASS"
+    },
+    {
+      "name": "real streamed completion",
+      "status": "PASS"
+    },
+    {
+      "name": "ordered events",
+      "status": "PASS"
+    },
+    {
+      "name": "final evidence-cited result",
+      "status": "PASS"
+    },
+    {
+      "name": "SSE replay cursor",
+      "status": "PASS"
+    },
+    {
+      "name": "idempotent HTTP retry",
+      "status": "PASS"
+    },
+    {
+      "name": "typed invalid-input error",
+      "status": "PASS"
+    },
+    {
+      "name": "foreign run isolation",
+      "status": "PASS"
+    },
+    {
+      "name": "origin denial",
+      "status": "PASS"
+    },
+    {
+      "name": "private routes absent",
+      "status": "PASS"
+    },
+    {
+      "name": "bounded cancellation",
+      "status": "PASS"
+    },
+    {
+      "name": "public OpenAPI",
+      "status": "PASS"
+    },
+    {
+      "name": "no private mount",
+      "status": "PASS"
+    },
+    {
+      "name": "internal network",
+      "status": "PASS"
+    },
+    {
+      "name": "read-only nonroot process",
+      "status": "PASS"
+    },
+    {
+      "name": "resource limits",
+      "status": "PASS"
+    }
+  ],
+  "result_summary": "payment-api: evidence supports database connection pressure.",
+  "run_duration_ms": 573.328,
+  "image_id": "sha256:be768f2281e7aed714c7dc90ec977a91eef5d2fcc72aabeca78a54917f29aa12",
+  "local_adjustments": {
+    "healthcheck_timeout_seconds": 15,
+    "reason": "Linux amd64 image emulated on arm64 with CPU limit; production native 3-second probe not verified on VPS",
+    "preview_edge": "Only Nginx joins the localhost-facing edge network; backend remains internal only",
+    "direct_backend_host_port": "Docker suppresses published ports on internal-only networks in this environment; proxy access was verified"
+  }
+}

@@ -15,3 +15,7 @@ When code changes:
 7. Rebuild the frontend/static export and verify version selection in the browser.
 
 Architecture-affecting source files are explicitly enumerated in scripts/architecture.py. Extend that list when adding a new implementation/configuration directory. The source commit avoids a circular hash: it points to the implementation commit; the subsequent documentation commit contains the snapshot. Build/release evidence records the final deployed commit separately.
+
+## v4 integration paths
+
+Application 0.3.0 adds architecture 2.0.0 because public simulation moves from browser-only calculation to an isolated server runtime. Study it at `/projects/resolveai/app/architecture`; read its index and immutable snapshots through `/api/projects/resolveai/v1/architecture`. The old root deployment retains its existing `/architecture` until the shared Portfolio cutover. Snapshots 1.0.0, 1.0.1 and 1.1.0 are preserved byte-for-byte.

@@ -33,3 +33,7 @@ Admin routes manage applications and environments, credentials, connectors, note
 Errors contain code, message, and request_id; validation errors list field paths and types without echoing rejected values. Request bodies are capped at 32 KiB. Source ingestion has a 60/minute quota. Owner retry and connector tests have 20/minute quotas. Login has global and per-client limits. The public static proxy applies request rate and method restrictions. See the implementation for exact policy constants.
 
 Health/live does not contact dependencies. Health/ready checks PostgreSQL with a two-second timeout in private mode; synthetic mode checks no private dependency. Report readiness does not imply operational resolution.
+
+## Public simulation recordings
+
+`GET /api/v1/demo/scenarios/{slug}/trace` returns a committed synthetic backend recording for an allowlisted scenario. It is read-only and never runs an investigation. The `/simulation` page executes an editable browser model locally; its Run button never posts edited data to `/api/v1/events`. See [SIMULATION_GUIDE.md](SIMULATION_GUIDE.md) for fidelity and exercises.

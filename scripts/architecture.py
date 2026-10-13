@@ -8,16 +8,19 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PATTERNS = [
     "app/**/*.py",
+    "contracts/**/*.schema.json",
+    ".env.example",
     "web/src/**/*",
     "alembic/versions/*.py",
     "deploy/*",
     "compose.yaml",
     "pyproject.toml",
     "web/package.json",
-    "web/vite.config.ts",
+    "web/vite*.config.ts",
     "Dockerfile",
     "web/scripts/*",
     "scripts/**/*.py",
+    "demo/**/*.json",
 ]
 
 

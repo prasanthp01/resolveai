@@ -5,6 +5,7 @@ from typing import Any
 import httpx
 from app.schemas.contracts import InvestigationReport
 from app.core.config import settings
+from app.policies import severity
 from app.core.security import redact
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -12,10 +13,6 @@ ROOT = Path(__file__).resolve().parents[2]
 
 def scenarios():
     return json.loads((ROOT / "demo/scenarios.json").read_text())
-
-
-def severity(rate):
-    return "CRITICAL" if rate >= 50 else "HIGH" if rate >= 10 else "MEDIUM" if rate >= 1 else "LOW"
 
 
 def validate_report(value, evidence):
@@ -88,17 +85,35 @@ def recorded_report(evidence, rate, service):
 
 async def live_report(evidence, rate, service, operation_id):
     cfg = settings()
+    from app.agents.routing import AgentOpsBridge, InferenceRequest, AIUnavailable, endpoint
+
+    if cfg.llm_provider == "agentops":
+        if not cfg.llm_enabled:
+            raise AIUnavailable("POLICY_BLOCKED", "Live inference is disabled")
+        request = InferenceRequest(
+            environment=cfg.agentops_environment,
+            allowed_regions=["eu"],
+            routing_policy_version=cfg.agentops_policy_version,
+            correlation_id=operation_id,
+            trace_id=operation_id,
+            operation_id=operation_id,
+            mode="LIVE_MODEL_AUTHENTICATED",
+        )
+        await AgentOpsBridge(cfg.agentops_url, cfg.agentops_token).require_live(request)
+    if cfg.llm_provider != "openai_compatible":
+        raise AIUnavailable("POLICY_BLOCKED", "Provider adapter is not approved")
     if not cfg.llm_enabled or not cfg.llm_api_key or not cfg.llm_model:
         raise ValueError("LLM_NOT_CONFIGURED")
+    base_url = endpoint(cfg.llm_base_url)
     prompt = {
         "service": redact(service),
         "severity": severity(rate),
         "evidence": json.loads(redact(evidence)),
         "schema": InvestigationReport.model_json_schema(),
     }
-    async with httpx.AsyncClient(timeout=25, follow_redirects=False) as client:
+    async with httpx.AsyncClient(timeout=25, follow_redirects=False, trust_env=False) as client:
         response = await client.post(
-            "https://api.openai.com/v1/chat/completions",
+            base_url + "/chat/completions",
             headers={"Authorization": "Bearer " + cfg.llm_api_key, "Idempotency-Key": operation_id},
             json={
                 "model": cfg.llm_model,

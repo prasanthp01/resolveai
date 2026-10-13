@@ -1,0 +1,13 @@
+{
+  "verified_at": "2026-10-13T10:55:48.348066+00:00",
+  "scope": "existing public ResolveAI static release",
+  "files_verified": 84,
+  "archive_sha256": "b68ab1d82c884051d10d352acb288e4a26eaa06aaa3fb99d478071614517b066",
+  "original_unchanged": true,
+  "restore_verified": true,
+  "root_release_preserved": "releases/v0.2.0-621d99e",
+  "active_proxy_sha256": "e8b738472d8b69d4bc9c03c0bbe2c3c4a9e31fafd0d75804e4eb153b87cd9ab0",
+  "source_proxy_matches_active": true,
+  "database_backup": "N/A: the existing public ResolveAI deployment is static; private test DB restore is recorded separately",
+  "result": "PASS"
+}

@@ -60,9 +60,12 @@ from app.schemas.contracts import (
 from app.services.incidents import ingest
 from app.agents.investigate import scenarios, recorded_report
 from app.connectors.gateway import destination, execute, PolicyDenied
+from app.services.simulations import read_simulation
+from app.version import APP_VERSION
 
 ROOT = Path(__file__).resolve().parents[1]
-app = FastAPI(title="ResolveAI", version="0.1.0", docs_url=None, redoc_url=None, openapi_url=None)
+app = FastAPI(title="ResolveAI", version=APP_VERSION, docs_url=None, redoc_url=None, openapi_url=None)
+API_BASE = settings().api_prefix.rstrip("/")
 DB = Annotated[AsyncSession, Depends(db)]
 log = logging.getLogger("resolveai")
 _demo_requests: deque[float] = deque()
@@ -206,23 +209,23 @@ async def ready(session: DB):
     return {"status": "ready", "mode": "private"}
 
 
-@app.get("/api/v1/config")
+@app.get(API_BASE + "/config")
 async def config():
     return {
         "demo": settings().demo_mode,
-        "version": "0.1.0",
+        "version": APP_VERSION,
         "build_sha": settings().build_sha,
         "live_ai_enabled": False if settings().demo_mode else settings().llm_enabled,
     }
 
 
-@app.get("/api/v1/openapi.json")
+@app.get(API_BASE + "/openapi.json")
 async def schema(request: Request, session: DB):
     await owner(request, session)
     return app.openapi()
 
 
-@app.post("/api/v1/auth/login")
+@app.post(API_BASE + "/auth/login")
 async def login(payload: Login, request: Request, response: Response, session: DB):
     if settings().demo_mode:
         raise HTTPException(403, "Public demo is read-only")
@@ -255,12 +258,13 @@ async def login(payload: Login, request: Request, response: Response, session: D
         secure=settings().cookie_secure,
         httponly=True,
         samesite="strict",
+        path=settings().cookie_path,
         max_age=28800,
     )
     return {"username": user.username, "csrf_token": csrf}
 
 
-@app.get("/api/v1/auth/me")
+@app.get(API_BASE + "/auth/me")
 async def me(request: Request, session: DB):
     actor = await owner(request, session)
     user = await session.get(User, actor)
@@ -269,7 +273,7 @@ async def me(request: Request, session: DB):
     return {"username": user.username}
 
 
-@app.post("/api/v1/auth/logout")
+@app.post(API_BASE + "/auth/logout")
 async def logout(request: Request, response: Response, session: DB):
     await owner(request, session)
     await session.execute(
@@ -278,7 +282,7 @@ async def logout(request: Request, response: Response, session: DB):
         )
     )
     await session.commit()
-    response.delete_cookie("resolveai_session")
+    response.delete_cookie("resolveai_session", path=settings().cookie_path)
     return {"status": "logged_out"}
 
 
@@ -288,7 +292,7 @@ async def validate(payload: IncidentCreate, request: Request, session: DB):
     return {"valid": True}
 
 
-@app.get("/api/v1/applications")
+@app.get(API_BASE + "/applications")
 async def applications(request: Request, session: DB):
     await owner(request, session)
     apps = list((await session.scalars(select(Application).order_by(Application.name).limit(100))).all())
@@ -302,7 +306,7 @@ async def applications(request: Request, session: DB):
     ]
 
 
-@app.post("/api/v1/applications", status_code=201)
+@app.post(API_BASE + "/applications", status_code=201)
 async def create_application(payload: AppCreate, request: Request, session: DB):
     actor = await owner(request, session)
     await rate_limit(session, "owner-create:" + actor, 30)
@@ -314,7 +318,7 @@ async def create_application(payload: AppCreate, request: Request, session: DB):
     return public(obj, "id name slug")
 
 
-@app.get("/api/v1/applications/{app_id}")
+@app.get(API_BASE + "/applications/{app_id}")
 async def get_application(app_id: str, request: Request, session: DB):
     await owner(request, session)
     obj = await session.get(Application, app_id)
@@ -323,7 +327,7 @@ async def get_application(app_id: str, request: Request, session: DB):
     return public(obj, "id name slug")
 
 
-@app.post("/api/v1/applications/{app_id}/environments", status_code=201)
+@app.post(API_BASE + "/applications/{app_id}/environments", status_code=201)
 async def create_environment(app_id: str, payload: EnvCreate, request: Request, session: DB):
     actor = await owner(request, session)
     if not await session.get(Application, app_id):
@@ -335,7 +339,7 @@ async def create_environment(app_id: str, payload: EnvCreate, request: Request, 
     return public(obj, "id name application_id")
 
 
-@app.get("/api/v1/credentials")
+@app.get(API_BASE + "/credentials")
 async def credentials(request: Request, session: DB):
     await owner(request, session)
     return [
@@ -344,7 +348,7 @@ async def credentials(request: Request, session: DB):
     ]
 
 
-@app.post("/api/v1/credentials", status_code=201)
+@app.post(API_BASE + "/credentials", status_code=201)
 async def create_credential(payload: CredentialCreate, request: Request, session: DB):
     actor = await owner(request, session)
     if not await session.get(Environment, payload.environment_id):
@@ -370,7 +374,7 @@ async def create_credential(payload: CredentialCreate, request: Request, session
     }
 
 
-@app.delete("/api/v1/credentials/{key_id}")
+@app.delete(API_BASE + "/credentials/{key_id}")
 async def revoke(key_id: str, request: Request, session: DB):
     actor = await owner(request, session)
     obj = await session.get(Credential, key_id)
@@ -383,7 +387,7 @@ async def revoke(key_id: str, request: Request, session: DB):
     return {"revoked": True}
 
 
-@app.post("/api/v1/events")
+@app.post(API_BASE + "/events")
 async def events(payload: IncidentCreate, request: Request, response: Response, session: DB):
     credential = await integration(request, session)
     obj, new = await ingest(session, credential, payload)
@@ -391,7 +395,7 @@ async def events(payload: IncidentCreate, request: Request, response: Response, 
     return {"id": obj.id, "status": obj.status, "duplicate": not new}
 
 
-@app.post("/api/v1/webhooks/{key_id}")
+@app.post(API_BASE + "/webhooks/{key_id}")
 async def webhook(key_id: str, request: Request, response: Response, session: DB):
     if settings().demo_mode:
         raise HTTPException(403, "Public demo is read-only")
@@ -435,7 +439,7 @@ async def scoped_incident(id, request, session):
     return obj
 
 
-@app.get("/api/v1/incidents")
+@app.get(API_BASE + "/incidents")
 async def incidents(
     request: Request,
     session: DB,
@@ -473,13 +477,13 @@ async def incidents(
     ]
 
 
-@app.get("/api/v1/incidents/{id}")
+@app.get(API_BASE + "/incidents/{id}")
 async def incident(id: str, request: Request, session: DB):
     obj = await scoped_incident(id, request, session)
     return public(obj, INC_FIELDS)
 
 
-@app.get("/api/v1/incidents/{id}/timeline")
+@app.get(API_BASE + "/incidents/{id}/timeline")
 async def timeline(id: str, request: Request, session: DB):
     await scoped_incident(id, request, session)
     return [
@@ -492,7 +496,7 @@ async def timeline(id: str, request: Request, session: DB):
     ]
 
 
-@app.get("/api/v1/incidents/{id}/report")
+@app.get(API_BASE + "/incidents/{id}/report")
 async def report(id: str, request: Request, session: DB):
     obj = await scoped_incident(id, request, session)
     report = await session.scalar(select(Report).where(Report.incident_id == id))
@@ -508,7 +512,7 @@ async def report(id: str, request: Request, session: DB):
     }
 
 
-@app.post("/api/v1/incidents/{id}/investigations", status_code=202)
+@app.post(API_BASE + "/incidents/{id}/investigations", status_code=202)
 async def retry(id: str, request: Request, session: DB):
     actor = await owner(request, session)
     await rate_limit(session, "retry:" + actor, 20)
@@ -528,7 +532,7 @@ async def retry(id: str, request: Request, session: DB):
     return {"status": "QUEUED"}
 
 
-@app.patch("/api/v1/incidents/{id}/note")
+@app.patch(API_BASE + "/incidents/{id}/note")
 async def note(id: str, payload: Note, request: Request, session: DB):
     actor = await owner(request, session)
     obj = await session.get(Incident, id)
@@ -540,7 +544,7 @@ async def note(id: str, payload: Note, request: Request, session: DB):
     return {"note": obj.note}
 
 
-@app.get("/api/v1/connectors")
+@app.get(API_BASE + "/connectors")
 async def connectors(request: Request, session: DB):
     await owner(request, session)
     return [
@@ -549,7 +553,7 @@ async def connectors(request: Request, session: DB):
     ]
 
 
-@app.post("/api/v1/connectors", status_code=201)
+@app.post(API_BASE + "/connectors", status_code=201)
 async def add_connector(payload: ConnectorCreate, request: Request, session: DB):
     actor = await owner(request, session)
     if not await session.get(Environment, payload.environment_id):
@@ -574,7 +578,7 @@ async def add_connector(payload: ConnectorCreate, request: Request, session: DB)
     return public(obj, "id name kind enabled last_health")
 
 
-@app.post("/api/v1/connectors/{id}/test")
+@app.post(API_BASE + "/connectors/{id}/test")
 async def test_connector(id: str, request: Request, session: DB):
     actor = await owner(request, session)
     await rate_limit(session, "connector-test:" + actor, 20)
@@ -595,7 +599,7 @@ async def test_connector(id: str, request: Request, session: DB):
     return {"status": obj.last_health, "result": result}
 
 
-@app.delete("/api/v1/connectors/{id}")
+@app.delete(API_BASE + "/connectors/{id}")
 async def disable_connector(id: str, request: Request, session: DB):
     actor = await owner(request, session)
     obj = await session.get(Connector, id)
@@ -608,7 +612,7 @@ async def disable_connector(id: str, request: Request, session: DB):
     return {"enabled": False}
 
 
-@app.get("/api/v1/audit")
+@app.get(API_BASE + "/audit")
 async def audit(request: Request, session: DB, limit: int = Query(100, ge=1, le=300)):
     await owner(request, session)
     return [
@@ -617,7 +621,7 @@ async def audit(request: Request, session: DB, limit: int = Query(100, ge=1, le=
     ]
 
 
-@app.get("/api/v1/operations")
+@app.get(API_BASE + "/operations")
 async def operations(request: Request, session: DB):
     await owner(request, session)
     rows = (await session.execute(select(Job.status, func.count()).group_by(Job.status))).all()
@@ -636,12 +640,12 @@ async def operations(request: Request, session: DB):
     }
 
 
-@app.get("/api/v1/demo/scenarios")
+@app.get(API_BASE + "/demo/scenarios")
 async def demo_list():
     return [{k: v for k, v in s.items() if k != "evidence"} for s in scenarios()]
 
 
-@app.get("/api/v1/demo/scenarios/{slug}")
+@app.get(API_BASE + "/demo/scenarios/{slug}")
 async def demo_scenario(slug: str):
     value = next((s for s in scenarios() if s["slug"] == slug), None)
     if not value:
@@ -676,12 +680,17 @@ async def demo_scenario(slug: str):
     }
 
 
-@app.get("/api/v1/architecture")
+@app.get(API_BASE + "/demo/scenarios/{slug}/trace")
+async def simulation_trace(slug: str):
+    return read_simulation(slug)
+
+
+@app.get(API_BASE + "/architecture")
 async def architecture():
     return json.loads((ROOT / "architecture/index.json").read_text())
 
 
-@app.get("/api/v1/architecture/{version}")
+@app.get(API_BASE + "/architecture/{version}")
 async def architecture_version(version: str):
     index = await architecture()
     if version not in [v["version"] for v in index["versions"]]:
@@ -691,8 +700,14 @@ async def architecture_version(version: str):
 
 if (ROOT / "web/dist/assets").exists():
     app.mount("/assets", StaticFiles(directory=ROOT / "web/dist/assets"), name="assets")
+    app.mount(
+        "/projects/resolveai/app/assets",
+        StaticFiles(directory=ROOT / "web/dist/assets"),
+        name="prefixed-assets",
+    )
 
 
+@app.get("/projects/resolveai/app/resolveai-logo.png", include_in_schema=False)
 @app.get("/resolveai-logo.png", include_in_schema=False)
 async def logo():
     return FileResponse(ROOT / "web/public/resolveai-logo.png")

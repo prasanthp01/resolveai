@@ -1,0 +1,208 @@
+{
+  "schema_version": "1.0",
+  "slug": "resolveai",
+  "title": "ResolveAI incident investigation studio",
+  "git_revision": "19d14e039eb446110147eff0a2cf80268f5d7de2",
+  "status": "TESTED",
+  "environment": "test",
+  "public_route": "/projects/resolveai",
+  "deployment_url": null,
+  "last_verified_at": "2026-10-13T11:43:47.349248Z",
+  "simulation": {
+    "mode": "SANDBOX_DETERMINISTIC",
+    "provenance": {
+      "data_origin": "SYNTHETIC",
+      "connector_kind": "MOCK",
+      "app_version": "0.3.0",
+      "fixtures_version": "2.0.0",
+      "rules_version": "2.0.0",
+      "workflow_version": "1.0.0",
+      "model_version": "none",
+      "prompt_version": "none",
+      "source_revision": "19d14e039eb446110147eff0a2cf80268f5d7de2"
+    },
+    "input_schema_sha256": "5f5f5e8e4151ad1e839d85e215692e46dd793074de02a6bcac2a792047f693d1"
+  },
+  "tests": [
+    {
+      "name": "Backend suite",
+      "status": "PASS",
+      "command": "uv run pytest tests -q --junitxml=docs/v4/tests-final.xml",
+      "evidence": {
+        "evidence_id": "backend-suite",
+        "origin": "TEST",
+        "reference": "docs/v4/tests-final.xml",
+        "sha256": "324edfc97758429bff4faa0d5c98b87884f172950cccd8c7c3a1c9a9be3871e5"
+      },
+      "conditions": "117 tests passed with disposable private PostgreSQL/Redis and synthetic ASGI endpoints; runtime backend matches tested source.",
+      "executed_at": "2026-10-13T11:15:43.071298Z"
+    },
+    {
+      "name": "Release frontend build",
+      "status": "PASS",
+      "command": "docker --context colima build --platform linux/amd64 -t resolveai:0.3.0 .",
+      "evidence": {
+        "evidence_id": "release-frontend-build",
+        "origin": "TEST",
+        "reference": "docs/v4/release-build.json",
+        "sha256": "5143ac870b0622238ce0c9525606a1f7dade76c3721813a83773e47bb2b1f51b"
+      },
+      "conditions": "TypeScript, 7 studio checks, 165 historical assertions, 20 versioned diagrams and Vite passed.",
+      "executed_at": "2026-10-13T11:43:47.349248Z"
+    },
+    {
+      "name": "Isolated container routes",
+      "status": "PASS",
+      "command": "RESOLVEAI_EXPECTED_SHA=19d14e039eb446110147eff0a2cf80268f5d7de2 RESOLVEAI_DOCKER_CONTEXT=colima uv run python docs/v4/container_smoke.py",
+      "evidence": {
+        "evidence_id": "isolated-container-routes",
+        "origin": "TEST",
+        "reference": "docs/v4/container-routing.json",
+        "sha256": "6bdf92cc59e6db6671af83ecc8dad70b3db31e08f79c4f08514e1820d3afdb3b"
+      },
+      "conditions": "28 checks through local Nginx. Internal backend network and 15-second local emulation health-probe override. Not VPS HTTPS.",
+      "executed_at": "2026-10-13T11:27:41.876503Z"
+    },
+    {
+      "name": "Container restart",
+      "status": "PASS",
+      "command": "docker --context colima restart resolveai-sandbox-sandbox-1; HTTP session/run assertions",
+      "evidence": {
+        "evidence_id": "container-restart",
+        "origin": "TEST",
+        "reference": "docs/v4/container-restart.json",
+        "sha256": "02803c4cdb2e20c8951756f45302976e4a4019186924203ae70c382ebdf6ffd5"
+      },
+      "conditions": "Prior cookie denied 401; new session old run denied 404.",
+      "executed_at": "2026-10-13T11:30:58.369950Z"
+    },
+    {
+      "name": "Browser input and study journey",
+      "status": "PASS",
+      "command": "Browser interaction via CUA with actual built-release UI",
+      "evidence": {
+        "evidence_id": "browser-input-and-study-journey",
+        "origin": "TEST",
+        "reference": "docs/v4/browser-qa.json",
+        "sha256": "e9acf04116cb945603b003e4cff2ce25f431d298009f3c78cdce537da5757013"
+      },
+      "conditions": "Editable synthetic input changes findings; comparison, technical details and responsive screenshots. Some failure/keyboard cases executed in development preview as labeled.",
+      "executed_at": "2026-10-13T11:43:47.349248Z"
+    },
+    {
+      "name": "Existing public restore",
+      "status": "PASS",
+      "command": "Archive/hash public static files and restore to separate directory",
+      "evidence": {
+        "evidence_id": "existing-public-restore",
+        "origin": "TEST",
+        "reference": "docs/v4/vps-backup.json",
+        "sha256": "2199c775fefe36aaa565ec3fd05f2703734b1da05cd4635fcfebf87d32ad3c6b"
+      },
+      "conditions": "84 files restored and hashes matched; public deployment static, no public ResolveAI DB.",
+      "executed_at": "2026-10-13T10:55:48.348066Z"
+    },
+    {
+      "name": "Private database restore",
+      "status": "PASS",
+      "command": "uv run python scripts/verify_recovery.py",
+      "evidence": {
+        "evidence_id": "private-database-restore",
+        "origin": "TEST",
+        "reference": "docs/v4/recovery.json",
+        "sha256": "d80541dc793e4c3ec3e1c93b708f4db92a2584c96017ab4a8e2be02013fb4e16"
+      },
+      "conditions": "Disposable test DB only; 15 tables/22 rows match; original unchanged.",
+      "executed_at": "2026-10-13T10:49:55.795590Z"
+    },
+    {
+      "name": "Public activation",
+      "status": "BLOCKED",
+      "command": "GET https://portfolio.gappazappa.in/api/projects/resolveai/simulation/schema",
+      "evidence": {
+        "evidence_id": "public-activation",
+        "origin": "TEST",
+        "reference": "docs/v4/public-after-staging.json",
+        "sha256": "e4fe131300dc6c85c73cbe4a07bb7126cfba034fdc044b4f8c4375784b3aeb7e"
+      },
+      "conditions": "New API returns 503 PROJECT_NOT_CONNECTED; runtime not installed due to limited shared disk reserve; files staged only.",
+      "executed_at": "2026-10-13T11:33:41.632915Z"
+    }
+  ],
+  "benchmarks": [
+    {
+      "name": "Bounded synthetic ASGI workflow",
+      "status": "MEASURED",
+      "method": "24 runs at concurrency four; real deterministic stages with disclosed 60 ms checkpoint pacing; bounded admission, no queue.",
+      "environment": "Local arm64 ASGI transport, 10 CPUs; no network/VPS measurement",
+      "revision": "a23c91c5b535b19fd95cc0b8263da8ca14bf9c77",
+      "metrics": [
+        {
+          "name": "p50_ms",
+          "value": 560.344,
+          "unit": "ms"
+        },
+        {
+          "name": "p95_ms",
+          "value": 562.609,
+          "unit": "ms"
+        },
+        {
+          "name": "throughput_runs_per_second",
+          "value": 6.97,
+          "unit": "runs/s"
+        },
+        {
+          "name": "cpu_seconds",
+          "value": 0.14,
+          "unit": "s"
+        },
+        {
+          "name": "peak_rss_mib",
+          "value": 56.86,
+          "unit": "MiB"
+        },
+        {
+          "name": "failures",
+          "value": 0,
+          "unit": "count"
+        }
+      ],
+      "evidence": {
+        "evidence_id": "bounded-benchmark",
+        "origin": "BENCHMARK",
+        "reference": "docs/v4/sandbox-benchmark.json",
+        "sha256": "e514c71a42631715a1939ab0425ca8c38ea6365b1a4a78fca8dfeb4b70157358"
+      }
+    }
+  ],
+  "costs": [
+    {
+      "category": "PROVIDER",
+      "cost": {
+        "kind": "NONE",
+        "value": 0,
+        "currency": "USD",
+        "pricing_version": "no-provider-calls"
+      },
+      "method": "Deterministic fixtures make zero provider calls and use zero tokens; hosting/development are not allocated here.",
+      "evidence": {
+        "evidence_id": "zero-external-provider-spend",
+        "origin": "BENCHMARK",
+        "reference": "docs/v4/sandbox-benchmark.json",
+        "sha256": "e514c71a42631715a1939ab0425ca8c38ea6365b1a4a78fca8dfeb4b70157358"
+      }
+    }
+  ],
+  "skills": [],
+  "limits": [
+    "Public new API not connected: HTTP 503. Static files staged only; runtime not installed on VPS.",
+    "Observed shared disk reserve about 1.09 GiB; recheck before importing runtime.",
+    "Synthetic rule-policy evaluation is not evidence of real-world diagnostic accuracy or LLM reasoning.",
+    "Single-process in-memory ownership/quotas/runs; restart discards runs and sessions.",
+    "No live AgentOps inference, cross-project business events or KnowledgeOps lookup implemented or verified.",
+    "Hosting/development cost per run unmeasured; benchmark is local ASGI, not VPS capacity.",
+    "Independent review, owner acceptance, public HTTPS end-to-end and native VPS health probe remain unverified.",
+    "No video recorded; storyboard supplied."
+  ]
+}

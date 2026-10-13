@@ -1,0 +1,226 @@
+{
+  "contract_version": "1.0.0",
+  "release_commit": "b55d1a9dc5d2bab23817b984b9801ccff7304f04",
+  "files": {
+    "ecosystem_contracts/__init__.py": {
+      "source": "src/ecosystem_contracts/__init__.py",
+      "sha256": "1cff6a24c83ebbaed7af932b167ad52e9f911a3e093dfb95af055d31d6b01ce8"
+    },
+    "ecosystem_contracts/validation.py": {
+      "source": "src/ecosystem_contracts/validation.py",
+      "sha256": "1f1f8e18dc9f34f0bb74083976487d451bf0e96dc00c001db8695e2aebc1b717"
+    },
+    "LICENSE": {
+      "source": "LICENSE",
+      "sha256": "395622326a00c0d35a69ef34e09ac4cc0d412a12521bc8c8c69d18f263f28bf8"
+    },
+    "examples/errors/401.json": {
+      "source": "examples/errors/401.json",
+      "sha256": "93b168a099efb2a2e9533fd734ce6aa5107b8ca03b424af16a8d3655524dbaa5"
+    },
+    "examples/errors/403.json": {
+      "source": "examples/errors/403.json",
+      "sha256": "4e29552a6a0a190615524a23aff2f19d25000190440beec01d3d85db1ab2d139"
+    },
+    "examples/errors/404.json": {
+      "source": "examples/errors/404.json",
+      "sha256": "253aeee201600ab4cebc1297f40e987014f0f1320fdd289a7e0664c4d2e1b303"
+    },
+    "examples/errors/409.json": {
+      "source": "examples/errors/409.json",
+      "sha256": "9fe5d418bd044a67373f4cdd4060bb6a0d3b7ed41f14e0368cdbf1312ba430ea"
+    },
+    "examples/errors/410.json": {
+      "source": "examples/errors/410.json",
+      "sha256": "313d53feea258d3e700430257d4b1f801a970630d36dfea878d7605125a81d22"
+    },
+    "examples/errors/413.json": {
+      "source": "examples/errors/413.json",
+      "sha256": "7f76e8d58fd1f89f50cdcf038610fa7ce463d9bb7edb1020d547acb8223aa512"
+    },
+    "examples/errors/422.json": {
+      "source": "examples/errors/422.json",
+      "sha256": "e3d605f4c348fbd62299677b28987e464ddf1999a9899bf8645b1c41caf7adb2"
+    },
+    "examples/errors/429.json": {
+      "source": "examples/errors/429.json",
+      "sha256": "ff3dd6756d55c0768cbfe838e4be6459e99b231b49591585b9a3a55e14977fff"
+    },
+    "examples/errors/503.json": {
+      "source": "examples/errors/503.json",
+      "sha256": "8f0601b5f4f2259bf70765f2568068727d69c22a1e8dd7324761846d7cd4f847"
+    },
+    "examples/invalid/agent-handoff.json": {
+      "source": "examples/invalid/agent-handoff.json",
+      "sha256": "9e3cf04ededc90305915833780556450878cd0cdeaa612c2adef7c4625f960df"
+    },
+    "examples/invalid/ai-usage-recorded.json": {
+      "source": "examples/invalid/ai-usage-recorded.json",
+      "sha256": "a50d19ffa63c33c475f1b5453d69ab7e85337c6c85d293b579b863c9ae773577"
+    },
+    "examples/invalid/cross-project-event.json": {
+      "source": "examples/invalid/cross-project-event.json",
+      "sha256": "9fb3755f3dc2d9c2931478f4285a145b81c085d8d02d821db422875cb56a0044"
+    },
+    "examples/invalid/error.json": {
+      "source": "examples/invalid/error.json",
+      "sha256": "3df38c2da3656533e7f24cd6bfe60fcf6ac341ede2bc05cb6830d7e103358576"
+    },
+    "examples/invalid/event-receipt.json": {
+      "source": "examples/invalid/event-receipt.json",
+      "sha256": "c1a38f1f37bfdf0c4369f9cfab5ec91cfd41325ecc2dd380d7f5306b2703ce70"
+    },
+    "examples/invalid/incident-investigation-completed.json": {
+      "source": "examples/invalid/incident-investigation-completed.json",
+      "sha256": "da7c42a29946c03a84b04f8dfae31001d9fd8dd06a6d6db8075211b6b68302b5"
+    },
+    "examples/invalid/inference-request.json": {
+      "source": "examples/invalid/inference-request.json",
+      "sha256": "e71fd507e61aa3fa7e87763dfbdf1aa79245819492987da33bf41759a66efc79"
+    },
+    "examples/invalid/knowledge-query.json": {
+      "source": "examples/invalid/knowledge-query.json",
+      "sha256": "25b2aa2033ba21160f188d434fd8827a76bb0326c496413581a4d0ffddc2130d"
+    },
+    "examples/invalid/knowledge-response.json": {
+      "source": "examples/invalid/knowledge-response.json",
+      "sha256": "179cafb333e3a124fa0354278be0cfba2de03b2b8b3df44d17c12f43d65fb689"
+    },
+    "examples/invalid/portfolio-evidence.json": {
+      "source": "examples/invalid/portfolio-evidence.json",
+      "sha256": "c99ae4f426d603bbe446ea7b1e1fdc70550296fa714b8f6258bcdc23d980c103"
+    },
+    "examples/invalid/project-identity.json": {
+      "source": "examples/invalid/project-identity.json",
+      "sha256": "e09fc6200f2010948d64a8226b7dd758d4d2105e1c0338d5615cd1cf75d13e00"
+    },
+    "examples/invalid/route-decision.json": {
+      "source": "examples/invalid/route-decision.json",
+      "sha256": "343c7667b4fb519cd401fb3dc3a2930d5db0a4bd3899551ef984e078760ed5ed"
+    },
+    "examples/invalid/simulation-event.json": {
+      "source": "examples/invalid/simulation-event.json",
+      "sha256": "4d3bf937f9d878e6281483ca885c2cf58d50e57b388cd134fdfb95726c7564f7"
+    },
+    "examples/invalid/simulation-events.json": {
+      "source": "examples/invalid/simulation-events.json",
+      "sha256": "304b54331957ee74e2aa8b5d1a7facbab28f0eb7b60bfd84ebd5169db36a93a6"
+    },
+    "examples/invalid/simulation-preset.json": {
+      "source": "examples/invalid/simulation-preset.json",
+      "sha256": "38a171f84bd1c6cf0dc750285c1d25459f47e5476bb761c1cd5670823557cc70"
+    },
+    "examples/invalid/simulation-presets.json": {
+      "source": "examples/invalid/simulation-presets.json",
+      "sha256": "9089bbfa66f2911565951f9bb1a3741a8af0d714ca8cffca6c0779a1682b775b"
+    },
+    "examples/invalid/simulation-result.json": {
+      "source": "examples/invalid/simulation-result.json",
+      "sha256": "057767dee56fad61006f20ae68a8603d0c3d64909b91009bb189751a89f319b7"
+    },
+    "examples/invalid/simulation-run.json": {
+      "source": "examples/invalid/simulation-run.json",
+      "sha256": "bdae1ff7acb5d1470ed1c36b07f265e67e74794b8feb07d9d82836c36a02c4c2"
+    },
+    "examples/invalid/simulation-schema.json": {
+      "source": "examples/invalid/simulation-schema.json",
+      "sha256": "7e76fbed5ded086bee6b5839343715dcf1ee53c7abf824d19d658febe71306d7"
+    },
+    "examples/invalid/simulation-start.json": {
+      "source": "examples/invalid/simulation-start.json",
+      "sha256": "ef571e5bc55a4681ce334ac8db80fc0825eb91a661214654f9d06e99dd7abd90"
+    },
+    "examples/invalid/workflow-execution-failed.json": {
+      "source": "examples/invalid/workflow-execution-failed.json",
+      "sha256": "195c884a0f9768ae893b396e7fcab6b08716755c25c69d564434917788a49e00"
+    },
+    "examples/mock-input.schema.json": {
+      "source": "examples/mock-input.schema.json",
+      "sha256": "d7d0dba672974e1fcc0a2813dc55825a400c1290c81b7ec4d714e4abb179093f"
+    },
+    "examples/valid/agent-handoff.json": {
+      "source": "examples/valid/agent-handoff.json",
+      "sha256": "e0d987a054c9ac1c59459efb45a1857a6dd824b452e91c97ace4817034e70cc4"
+    },
+    "examples/valid/ai-usage-recorded.json": {
+      "source": "examples/valid/ai-usage-recorded.json",
+      "sha256": "f9fc65b89dce2d141cd1b300e0c28cfd413a2f6776dfe138e0a74fb26e37686f"
+    },
+    "examples/valid/cross-project-event.json": {
+      "source": "examples/valid/cross-project-event.json",
+      "sha256": "92971b73b85cea5d580d5f711028a9d83039eb2e05699333c0821fcb079c183e"
+    },
+    "examples/valid/error.json": {
+      "source": "examples/valid/error.json",
+      "sha256": "e86db6c6981dc2e05fb61c5752def8f54191db7bb21cc8881a5840c5bfa795bb"
+    },
+    "examples/valid/event-receipt.json": {
+      "source": "examples/valid/event-receipt.json",
+      "sha256": "aa0f6326fc704adfc256c1763caaea3cf32ed99c1c3f30afd69509dc862addf0"
+    },
+    "examples/valid/incident-investigation-completed.json": {
+      "source": "examples/valid/incident-investigation-completed.json",
+      "sha256": "e33eb5d7ed82705d237195a48037300172fadfe33142f293d94b2b51369fd123"
+    },
+    "examples/valid/inference-request.json": {
+      "source": "examples/valid/inference-request.json",
+      "sha256": "f120acd5a7a04bdef609d4786dc883b160c5841999732d0bb70faed927e608d2"
+    },
+    "examples/valid/knowledge-query.json": {
+      "source": "examples/valid/knowledge-query.json",
+      "sha256": "51bb72049468501f93e1a7a1012e0137f98f57eade59379a42ffb9caa48e664e"
+    },
+    "examples/valid/knowledge-response.json": {
+      "source": "examples/valid/knowledge-response.json",
+      "sha256": "90e56221eed3c6b6705900c4155b874053a449d824c99e51c1bfaed187154465"
+    },
+    "examples/valid/portfolio-evidence.json": {
+      "source": "examples/valid/portfolio-evidence.json",
+      "sha256": "27ee100d5b36fb1f6cffdf6fae38dd22e28c5ba7860e04b7b6e4f99507f8dc25"
+    },
+    "examples/valid/project-identity.json": {
+      "source": "examples/valid/project-identity.json",
+      "sha256": "b52ac8ab50e2605ff08610beae61b049e1806ffbcf770ad9467da60f66689353"
+    },
+    "examples/valid/route-decision.json": {
+      "source": "examples/valid/route-decision.json",
+      "sha256": "74b53e85dbba22f335e5f9876364b3c928c59e205c1dea6fa102f85c7d3cc162"
+    },
+    "examples/valid/simulation-event.json": {
+      "source": "examples/valid/simulation-event.json",
+      "sha256": "96966ac19c478c0e3424de7acbe1b3ed8166ab61baad0e9b9e03bb0e87ca54a0"
+    },
+    "examples/valid/simulation-events.json": {
+      "source": "examples/valid/simulation-events.json",
+      "sha256": "62ca3a575eaf3c7f5614ebb05af4cc9b2c0db0b21a7bdc074a1cea404ac0141d"
+    },
+    "examples/valid/simulation-preset.json": {
+      "source": "examples/valid/simulation-preset.json",
+      "sha256": "a9e44ef4304d0de0bb97d607e950ba18b364620cee7fc0e700d54e0bf4ae3d35"
+    },
+    "examples/valid/simulation-presets.json": {
+      "source": "examples/valid/simulation-presets.json",
+      "sha256": "54943a1c752d132d180cd1fd786736221e5496220bc8079c64ac3c4313da751c"
+    },
+    "examples/valid/simulation-result.json": {
+      "source": "examples/valid/simulation-result.json",
+      "sha256": "d5340546e8819107c6ba3557f682aa49978fa908e1eb65f0702996bbe1b52296"
+    },
+    "examples/valid/simulation-run.json": {
+      "source": "examples/valid/simulation-run.json",
+      "sha256": "cdb327119984ec8d638fbf5143270f56f4b41590194cde6825687c5869ccd36f"
+    },
+    "examples/valid/simulation-schema.json": {
+      "source": "examples/valid/simulation-schema.json",
+      "sha256": "c53dc451d1956775264d33ae121e789f5d9affb538c0ccb7aafae0d45f0424f0"
+    },
+    "examples/valid/simulation-start.json": {
+      "source": "examples/valid/simulation-start.json",
+      "sha256": "7a0e316b900475932537585539675fe6fba770612e898dc4ffcb51e96d329d7c"
+    },
+    "examples/valid/workflow-execution-failed.json": {
+      "source": "examples/valid/workflow-execution-failed.json",
+      "sha256": "a590601656721b76faf50eba7d3164094ab7c0c621cdfcddc7035cca2e2321b5"
+    }
+  }
+}

@@ -1,8 +1,8 @@
-# ResolveAI architecture v1.0.1
+# ResolveAI architecture v2.0.8
 
-Application v0.1.0 · 2026-10-13 · Source commit `330426a578102802716bffb317c8c65630c443c8`
+Application v0.3.6 · 2026-10-13 · Source commit `2b2449459751a66e97c23c1b89d7cb3195f4c995`
 
-ResolveAI is a single-tenant incident investigation application. The private workspace accepts scoped alerts and persists investigation work in PostgreSQL. A separate public demo reads synthetic scenarios only. Findings cite evidence; an operator decides whether to act.
+Architecture diagrams use build-time SVG assets and external styles so the strict Portfolio CSP preserves readable labels, edges and zoom controls.
 
 ## High-level architecture
 
@@ -20,30 +20,80 @@ flowchart TB
 ```
 
 ```mermaid
-flowchart LR
- Visitor[Browser visitor] --> Web[React interface]
- Web --> API[Read-only public endpoints]
- API --> Data[Synthetic scenario files]
- API --> Docs[Versioned architecture records]
+flowchart TB
+ Portfolio[Portfolio project page] --> Widget[Shared Studio in Shadow DOM]
+ Full[Full ResolveAI studio] --> Widget
+ Widget --> Visitor[Editable synthetic incident]
+ Visitor --> Session[Signed anonymous session and CSRF]
+ Session --> API[Isolated sandbox FastAPI]
+ API --> Validate[Strict schema and resource limits]
+ Validate --> Registry[Ephemeral owned run]
+ Registry --> Engine[Deterministic investigation]
+ Engine --> Fixtures[Synthetic diagnostic adapters]
+ Fixtures --> Rules[Support and contradiction rules]
+ Rules --> Report[Cited report with uncertainty]
+ Registry --> Events[Ordered SSE and polling events]
+ Report --> Wire[Contract adapter keeps warnings and fault history]
+ Wire --> UI[Plain language and technical views]
+ Events --> UI
+ UI --> Compare[Compare runs and export JSON]
+ Private[Separate private API and durable worker] -. No shared data or credentials .-> API
+ Versioned[Versioned architecture sources] --> Compile[Build-only Mermaid compiler]
+ Compile --> Assets[Checked SVG and external CSS]
+ Assets --> Study[Architecture study page under strict CSP]
+ Full --> Study
+
 ```
 
-### Two operating modes, one understandable codebase
+### Two execution boundaries
 
-The public experience is a controlled learning sandbox. The private experience performs authenticated investigations.
+Synthetic public computation and private durable work have different trust and recovery requirements.
 
-Public mode rejects state-changing requests before database dependencies run. Its scenario endpoints read bounded JSON fixtures and apply deterministic evidence rules. The browser animates the recorded steps; this animation is not a live investigation.
+The public entry point is app.sandbox.main. It accepts closed synthetic input and never imports the private API or opens a database connection. It exposes no credentials, connector configuration, arbitrary URL/SQL tools or paid inference routes. The deployment uses a dedicated internal network and no private data volume.
 
-For the constrained public VPS, scripts/export_demo.py exports the exact public scenario and architecture responses as static JSON beside the React build. The existing HTTPS proxy serves these files; there is no public Python process, database, or credential store. The container demo remains available for self-hosting.
+Public runs live in one bounded process: eight active runs globally, two per signed session, at most 256 retained runs, a four-second execution deadline and a ten-minute TTL. A restart invalidates sessions and runs. A 202 means ephemeral admission, not durable acceptance.
 
-Private mode enables administrator sessions, application and environment setup, scoped credentials, diagnostic connectors, and durable worker processing. Public and private deployments must have separate configuration and credentials. The public Compose profile does not start a database or worker.
+The separate app.main entry point retains authenticated administrator/integration identities, encrypted connector credentials, atomic PostgreSQL incident/job commits and fenced durable worker completion. Its 202 means work was committed durably. These guarantees must not be confused with the public sandbox.
 
-An application is a monitored product. An environment identifies its deployment context, such as staging or production. This v0.1 product has one administrator, not independent customer tenants.
+Portfolio owns /projects/resolveai and mounts the ResolveAI-owned widget from /projects/resolveai/app/widget/resolveai-studio.js. The full studio at /projects/resolveai/app/studio imports the same component. Both call the existing /api/projects/resolveai sandbox; no extra backend or iframe is introduced. The legacy root app remains a separate preserved release.
 
-- `app/main.py` → `guards`: Enforces public read-only mode before processing request bodies.
+- `app/sandbox/main.py` → `create_app`: Isolated public ASGI surface.
 
-- `app/main.py` → `demo_scenario`: Builds a reproducible synthetic report from fixture evidence.
+- `app/sandbox/runtime.py` → `RunStore`: Bounded ephemeral ownership and lifecycle.
 
-- `scripts/export_demo.py` → `export`: Builds a public-only static representation from the same canonical endpoints.
+- `app/main.py` → `API_BASE`: Configurable private API prefix.
+
+### Editable signals produce new evidence
+
+The server executes the submitted scenario rather than displaying an unchanged preset report.
+
+Visitors can change error rate, latency, connection limits, database CPU/locks/slow-query counts, Redis memory/evictions, upstream 429 counts and deployment context. Logs are selected by allowlisted fixture ID. A malicious-instruction fixture is quarantined, never interpreted as authority.
+
+Every editable signal has a plain-language definition, a concrete example, its permitted range and its effect on the deterministic rules. Valid ranges come from the discovered input schema; diagnostic thresholds are explained separately. Service name, incident text and seed are explicitly distinguished from diagnostic signals.
+
+Severity reuses the same pure policy as the private investigator. Synthetic adapters derive evidence from the validated metrics. Correlation checks support, competing signals and an unrelated decoy. Weak evidence yields abstention rather than an invented cause.
+
+All nine stages can be studied before execution. Plain-language and technical guides each explain what a stage receives, does, outputs and how errors are handled. A separate observed area shows only actual server events and completed checkpoint receipts. The result guide explains severity, evidence, hypotheses, uncertainty, human actions, timing, cost, provenance and export.
+
+Plain-language results explain impact, uncertainty and human next steps. Technical results expose sanitized inputs, rule decisions, citations, observed stages, versions and actual elapsed durations. No chain-of-thought is collected.
+
+Historical private backend recordings remain available as explicitly recorded artifacts. SANDBOX_DETERMINISTIC means new rule execution; REPLAY_RECORDED means an existing capture; authenticated live inference is unavailable to public visitors.
+
+Explanations have one source in the ResolveAI application. A release builds both the full app and embedded widget, so the Portfolio picks up new guidance through the same current app release. The strict Portfolio security policy is retained; scripts, styles and API calls remain same-origin.
+
+Cancellation targets admitted work. During session refresh and request admission the browser has no run identifier, so Cancel remains disabled until the server acknowledges the current run.
+
+An investigation can finish with incomplete evidence. Its successful result carries warnings and the retained fault history, while the shared errors array stays empty. A stopped or cancelled investigation retains errors and available diagnostics without claiming a completed report. The warning display stays visible in the Portfolio widget and full studio.
+
+- `app/policies.py` → `severity`: Shared deterministic severity policy.
+
+- `app/sandbox/engine.py` → `report_for`: Evidence-derived hypotheses and provenance.
+
+- `web/src/Studio.tsx` → `Studio`: Input editor, ordered events and both result views.
+
+- `web/src/studioInputHelp.ts` → `inputHelp`: Field definitions, examples, rule explanations and safe option meanings.
+
+- `web/src/StudioGuide.tsx` → `ProcessingGuide`: Separate study explanations from observed run evidence in both audience views.
 
 ### The gateway accepts work durably
 
@@ -87,44 +137,77 @@ Connector secrets are encrypted with a key stored outside PostgreSQL. The model 
 
 - `app/core/security.py` → `encrypt`: Protects stored connector and webhook secrets.
 
-### The explanation is inspectable
+### A model is optional and constrained
 
-Reports connect hypotheses to evidence instead of hiding the basis for a recommendation.
+The public investigation requires no model key; private model failures retain useful evidence.
 
-The baseline severity comes from deterministic error-rate rules. Fixture analysis evaluates diagnostic numbers. Its ground-truth evaluation file stays in tests and is not passed into the investigator.
+Private local inference uses an explicitly configured OpenAI-compatible endpoint, existing database request reservations, bounded timeout/output and citation validation. The adapter cannot invoke tools or remediation.
 
-Optional live analysis uses a fixed provider adapter with a daily request reservation, bounded timeout and output size. It can return structured findings but has no tool execution authority. Missing configuration produces NEEDS_REVIEW with an explicit needs_configuration report.
+AgentOpsBridge checks an authenticated control-plane policy. The observed AgentOps gateway currently exposes synthetic routing only, so ResolveAI returns AI_UNAVAILABLE for live diagnosis. An unapproved live payload contract returns POLICY_BLOCKED. No successful live connection is claimed.
 
-The report validator rejects invented evidence IDs and unknown fields. Stored trace events describe observable operations and outcomes. Private model chain-of-thought is not collected.
+Model fallback means trying another eligible model within one request. Workflow fallback means retaining deterministic diagnostic analysis and human review. The public provider-error examples demonstrate the latter using mock faults; they do not contact real providers.
 
-- `app/agents/investigate.py` → `validate_report`: Validates schema and evidence references.
+An expired or mismatched cached policy cannot authorize inference. Even an unexpired policy cannot permit local billable fallback when central quota reservation is unavailable. The private worker stores this outcome and preserves its incident/report state.
 
-- `app/jobs/worker.py` → `reserve_usage`: Reserves model-call budget before an external request.
+- `app/agents/routing.py` → `AgentOpsBridge`: Authenticated policy boundary and typed refusal.
+
+- `app/agents/routing.py` → `safe_fallback`: Scope, expiry and central-quota constraints.
+
+- `app/jobs/worker.py` → `gather`: Retains evidence when AI is unavailable.
+
+### Architecture visuals obey the host security policy
+
+The browser displays prepared diagrams without running the diagram compiler.
+
+The release contains scalable SVG markup and a same-origin stylesheet generated from each versioned Mermaid definition. Labels and arrows keep their colors when the Portfolio enforces style-src self; no unsafe-inline, nonce exception or host-policy change is introduced.
+
+A normal application build verifies every source and asset checksum. Diagram authors explicitly regenerate assets using the pinned build-only Mermaid CLI and an installed Chromium executable. The generator does not download a browser. Mermaid is not part of the runtime application bundle.
+
+The study page accepts only an exact match between the API diagram source and the compiled manifest. An unknown source produces an accessible explanation and escaped source text instead of dynamically interpreting or inserting it.
+
+- `web/src/ArchitectureDiagram.tsx` → `ArchitectureDiagram`: Displays only compiled diagram assets and preserves the source fallback.
+
+- `web/scripts/generate-diagram-assets.mjs` → `externalizeStyles`: Renders immutable sources offline and extracts their styles.
+
+- `web/scripts/check-diagram-assets.mjs` → `stylesheet_sha256`: Fails the build on source drift, asset tampering or inline styling.
 
 ## Low-level architecture
 
 ```mermaid
 sequenceDiagram
- participant S as Monitoring source
- participant A as FastAPI
- participant P as PostgreSQL
- participant W as Worker
- participant C as Connector gateway
- S->>A: POST /api/v1/events + scoped token
- A->>A: Validate identity, schema, and quota
- A->>P: BEGIN, insert incident + job + audit
- P-->>A: COMMIT
- A-->>S: 202 + stable incident ID
- W->>P: Lock eligible job, increment claim version
- P-->>W: Commit lease ownership
- W->>C: Authorized bounded diagnostics
- C-->>W: Evidence with source and observation time
- W->>W: Analyze and validate report citations
- W->>P: Verify fence, save evidence/report, complete job
- P-->>W: COMMIT
- S->>A: GET incident report with scoped identity
- A->>P: Read source-scoped report
- A-->>S: Report, uncertainty, and evidence
+ participant V as Visitor
+ participant W as Shared Studio widget
+ participant A as Sandbox API
+ participant R as Owned run registry
+ participant E as Deterministic engine
+ V->>W: Open Portfolio or full studio
+ W->>W: Load external CSS and mount shared component
+ W->>A: GET schema and anonymous session
+ A-->>W: Input schema, scoped cookie and CSRF
+ W-->>V: Editable fields and stage/result guides
+ V->>A: POST edited input and request key
+ A->>A: Validate origin, token, bounds and quota
+ alt Invalid or forbidden
+ A-->>V: Typed 401, 403, 422 or 429
+ else Valid new request
+ A->>R: Reserve owned run and request key
+ A-->>V: 202 and unpredictable run ID
+ Note over V,W: Cancel is enabled only after this admission
+ R->>E: Execute bounded stages
+ E->>E: Derive metrics, inspect logs, correlate evidence
+ E-->>R: Ordered events and cited result
+ V->>A: GET events with last event ID
+ A->>R: Check run ownership and replay cursor
+ A-->>V: SSE events or JSON polling
+ V->>A: GET result
+ alt Completed report including recovered faults
+ A-->>V: SUCCEEDED, empty errors, warnings and fault history
+ else Failed or cancelled
+ A-->>V: Terminal errors and available diagnostics
+ end
+ end
+ Note over A,R: Cancel or deadline stops work and TTL removes temporary state
+ Note over R,E: No real model, connector or remediation calls
 ```
 
 ```mermaid
@@ -141,6 +224,36 @@ erDiagram
  INCIDENT ||--o{ MODEL_USAGE : budgets
  USER ||--o{ SESSION : authenticates
 ```
+
+### Anonymous execution, ownership and replay
+
+A run ID is a locator, not an authorization credential.
+
+The schema endpoint creates or reuses a thirty-minute HttpOnly SameSite=Strict session scoped to /api/projects/resolveai and returns an independent CSRF token. HTTPS enables Secure cookies. POST requires both the signed session and the exact configured origin/token.
+
+RunStore.start performs idempotency comparison and capacity reservation without yielding. Because the configured sandbox has one event loop and one worker, competing admissions cannot bypass its global limit. Multiple process replicas would need shared admission/state and are explicitly unsupported.
+
+A repeated client_correlation_id with identical normalized input returns the existing owned run; changed input returns 409. A different session receives 404 for the same run ID. Expired session identities require a fresh session, and expired results return 410.
+
+Each observed action has a monotonically increasing per-run sequence, event ID, mode, overview and sanitized technical metadata. SSE supports Last-Event-ID and terminal completion; JSON polling returns a bounded history. The client deduplicates and orders events, rejects conflicts and confirms a contiguous sequence before accepting a final result.
+
+Cancellation, controlled connector timeouts, mock provider 429/invalid output and the four-second deadline have explicit outcomes. Missing database evidence is not treated as healthy evidence. A fake-ticket adapter demonstrates two retries producing one synthetic record and no real ticket.
+
+Completed runs retain a semantic hash of deterministic output separately from variable run IDs and measured timing. Same input and versions produce the same semantic result. The sixty-millisecond cooperative checkpoint pacing is disclosed and included in durations.
+
+Cancellation appends one fault object with code, message and retryable state, then references it from the active BLOCKED event before finishing CANCELLED. Polling and SSE use the same wire serializer; both require the message. The cancellation regression covers both transports and the final typed result.
+
+- `app/sandbox/main.py` → `identity`: Signed ownership and mutation controls.
+
+- `app/sandbox/runtime.py` → `start`: Atomic admission and idempotency.
+
+- `app/sandbox/runtime.py` → `execute`: Observed workflow and failure paths.
+
+- `web/src/studioClient.ts` → `mergeSteps`: Ordered event reconciliation.
+
+- `app/sandbox/effects.py` → `SyntheticTickets`: Scoped fake-ticket idempotency.
+
+- `tests/sandbox/test_studio.py` → `test_cancellation_events_remain_readable_through_polling_and_sse`: Verify cancellation history can still be streamed, polled and resolved to a final record.
 
 ### Request contracts and identity separation
 
@@ -208,23 +321,29 @@ Unavailable connectors produce recorded partial collection outcomes. A missing p
 
 - `app/jobs/worker.py` → `gather`: Collects evidence outside long-running database transactions.
 
-### Frontend state and report presentation
+### Presentation and integration paths
 
-The browser renders server state and keeps synthetic replay unmistakable.
+One React Studio serves the canonical Portfolio page and full app, with CSS and lifecycle boundaries.
 
-The React shell separates overview, incident list, report detail, integrations, operations, and architecture. The public replay timer reveals pre-existing timeline entries; it creates no server job and calls no model.
+Portfolio renders the resolveai-studio custom element and a same-origin ES module. The ResolveAI widget build bundles React and emits resolveai-studio.css beside it. Module registration creates an open shadow root; external CSS loads before React mounts. No styles or script code are injected inline.
 
-The report view presents hypotheses, cited evidence, uncertainty, and human-reviewed recommendations. It labels synthetic analysis and avoids describing recommendations as executed operations.
+The shared Studio discovers schema and canonical preset_id/title presets, validates run identity and ordered event history, then renders the same input help, nine stage guides, observations and final result for both entry points. The old generic Portfolio adapter is not used for ResolveAI.
 
-The shared API client sends cookies and the CSRF header on same-origin requests. Integration credentials are held only in the one-time reveal component and are never saved in browser local storage.
+Shadow DOM prevents the Portfolio generic studio selectors from changing the application controls. Accessible labels and live regions remain inside the shadow tree. Returning to the stage list uses a component ref rather than document-wide fragment resolution.
 
-The architecture module and Mermaid renderer are loaded only when needed. Diagrams have readable explanations and expandable source. Smaller screens retain navigation, readable report sections, and scrollable diagram canvases.
+A stylesheet failure produces an accessible error and a full-studio link. A React render failure is caught by WidgetBoundary. A module failure leaves the static Portfolio fallback. Removing the element unmounts Studio, which aborts discovery/requests, closes SSE and clears polling. A stale load callback cannot mount after disconnect.
 
-- `web/src/api.ts` → `api`: Shared JSON client and safe error propagation.
+The existing app static route serves the widget with no-cache and same-origin CSP. Publish the ResolveAI release before the Portfolio loader; rollback the Portfolio pointer before reverting to an app release that lacks the widget. Other project pages, shared edge configuration and legacy root pages are preserved.
 
-- `web/src/main.tsx` → `ReportView`: Evidence-linked findings and uncertainty.
+Studio disables Cancel when run is null or terminal. start clears any prior run before session refresh and request creation, so the control can only target the new admitted run. Terminal status disables cancellation while the final result is being loaded.
 
-- `web/src/Architecture.tsx` → `ArchitecturePage`: Version selection and study views.
+- `web/src/widget.tsx` → `ResolveAIStudio`: Custom element, isolated styles, fallback and unmount lifecycle.
+
+- `web/vite.widget.config.ts` → `defineConfig`: Production bundled widget and external CSS emitted in the app release.
+
+- `web/src/StudioGuide.tsx` → `stageList`: Keyboard return navigation works in full app and shadow tree.
+
+- `web/src/Studio.tsx` → `Studio`: Single implementation for editing, observations and learning guides.
 
 ### Architecture records and release linkage
 
@@ -241,6 +360,74 @@ The Markdown architecture document is rendered from the same record used by the 
 - `scripts/architecture.py` → `render`: Generates repository documentation from the canonical record.
 
 - `app/main.py` → `architecture_version`: Serves only versions explicitly listed in the index.
+
+### Pinned public contract adapter
+
+Internal domain details and the shared wire envelope evolve independently.
+
+Contracts 1.0.0 is a verified local release. ResolveAI pins its schema checksums and tests real endpoint responses. It preserves the starter schemas only for historical study; they are not the current wire contract.
+
+The shared schema and presets describe permitted input and its canonical SHA-256. The start envelope carries seed and client correlation ID. Run state carries ownership-scoped lifecycle data, expiry and provenance. Domain validation is narrower than the generic envelope.
+
+SSE emits step events with numeric IDs and a final end event. Reconnection cursors must agree, foreign runs return 404, expired logs return 410, and malformed or impossible cursors return 409. Polling uses the same ordered events. Both edge-stripped and full-prefix HTTP paths are supported.
+
+Canonical technical events carry action, schema versions, input/output references, decisions and evidence hashes. The completed output preserves full synthetic evidence_ledger and step_details, so the UI can inspect each referenced action. Generic protocol errors remain typed; detailed controlled-fault labels remain in output.faults.
+
+Public simulation contract adoption does not prove cross-project event ingestion, knowledge lookup, or live model integration. Those capabilities remain separately gated and are reported explicitly in the release handoff.
+
+wire.result maps domain errors by terminal state: SUCCEEDED maps to an empty canonical errors array, but every domain fault remains in output.faults, its message in warnings, and its original failed or blocked checkpoint in output.step_details. FAILED and CANCELLED retain typed canonical errors. No engine evidence or domain state is erased.
+
+The UI resultOutcome reads warnings and output.faults; the diagnostic panel reads output.faults independently of canonical errors. A recovered connector timeout therefore still says Completed with warnings and exposes CONNECTOR_TIMEOUT even though portable clients accept the result.
+
+The test-only upstream SchemaRegistry is vendored without changes and hash checked against Contracts 1.0.0. Unlike shape-only JSON Schema checks, its semantic checks reject success with errors, inconsistent versions/cost markers and sandbox provider execution. The local HTTP probe tests real cookie/CSRF admission, all controlled faults, cancellation, replay and repeatable seed output.
+
+Historical recordings are immutable examples rather than current-release execution evidence. tests/recorded-simulations.json binds their bytes, original application version and code fingerprint to their historical source tree. The complete backend test suite separately executes the current private pipeline and public sandbox.
+
+Date-time format validation is optional in jsonschema unless its checker dependency is installed. ResolveAI pins the upstream SDK jsonschema and rfc3339-validator versions in the test dependency lock and tests an impossible calendar timestamp, preventing a fresh environment from silently skipping that format gate. The test-only validator remains outside the runtime image.
+
+- `app/sandbox/wire.py` → `install_openapi`: Maps domain results to pinned shared schema resources.
+
+- `contracts/ADOPTION.md` → ``: Exact local contract release and adoption scope.
+
+- `tests/sandbox/test_studio.py` → `test_pinned_metadata_errors_and_stripped_paths`: Tests actual metadata, run, event and error envelopes.
+
+- `scripts/check_contract_adoption.py` → `semantic_output`: Real HTTP verification with explicit repeatability exclusions for duration and generated identifiers.
+
+- `web/src/studioProcessHelp.ts` → `resultOutcome`: Keep successful partial-evidence warnings visible without relying on terminal errors.
+
+- `tests/test_simulations.py` → `HISTORICAL`: Verify original recorded bytes and provenance independently from current application version.
+
+### Diagram compilation, matching and zoom
+
+The build owns layout; the browser owns only bounded viewing state.
+
+The compiler deduplicates exact sources with SHA-256 and uses that digest as the SVG ID. It parses SVG as XML, rejects active/external content, removes style elements, and moves valid former-inline declarations to ID-scoped external CSS with preserved cascade priority. Invalid ER-style fragments are discarded by CSSOM just as a browser discards them.
+
+The generated manifest records exact source text and hashes of each SVG and the shared stylesheet. Vite bundles only these checked assets into the lazy architecture view. Runtime Mermaid rendering and API-supplied HTML insertion are removed.
+
+Zoom changes a data-zoom attribute through bounded 25-percent increments from 100 to 500 percent. External stylesheet selectors set the width; no inline style is required. The diagram viewport is keyboard-focusable and scrollable. Fit resets width and both scroll positions. A changed source remounts at Fit.
+
+Verification uses the same strict policy as the frozen Portfolio, checks computed shape/text/edge styles and fresh-reload violation events, and exercises both HLD/LLD, zoom/Fit and an unavailable-source response. Browser-tool CSP events are measured on a no-application control page and recorded separately.
+
+- `web/scripts/diagram-assets.mjs` → `externalizeStyles`: Separates SVG markup from CSS without retaining active content.
+
+- `web/src/ArchitectureDiagram.tsx` → `DiagramCanvas`: Exact source matching, visible fallback and bounded viewing controls.
+
+- `web/src/styles.css` → `.diagram-canvas[data-zoom="500"]`: External CSS controls magnification under style-src self.
+
+## Change input, inspect evidence and recover from a failure
+
+1. **Start a real sandbox run** — Select payment outage and submit the preset. The server validates it and assigns a session-owned run ID. (`app/sandbox/main.py:start`)
+
+2. **Inspect the stages** — Select each stage before running to study its inputs, work, outputs and errors in both views. Then run the preset and compare those guides with the separately labelled observed events and recorded outputs. (`web/src/Studio.tsx:Studio`)
+
+3. **Change one signal** — Lower DB connections from 96 to 20 and run again. Connection pressure loses support while severity remains driven by error rate. Compare the two reports. (`app/sandbox/engine.py:correlate`)
+
+4. **Try invalid input** — Enter error_rate 120 or add an unknown JSON field. The server rejects the request with field errors before creating a run; your editor content remains available to correct. (`app/sandbox/contracts.py:SimulationInput`)
+
+5. **Simulate a missing diagnostic** — Choose connector_timeout. The report retains other evidence, removes unavailable database evidence and states uncertainty. No real connector was contacted. (`app/sandbox/runtime.py:execute`)
+
+6. **Study cancellation and expiry** — Choose workflow_timeout and cancel during execution. The active stage shows cancellation, later stages remain unobserved and the final record explains that no report completed. Without cancellation the deadline fails the run. Compare this with a completed investigation that has no supported cause. (`app/sandbox/runtime.py:RunStore`)
 
 ## Follow one alert from HTTP to a report
 
@@ -282,6 +469,10 @@ The Markdown architecture document is rendered from the same record used by the 
 
 ## Version changes
 
-- Improve sequence-diagram arrow, actor-border, and message contrast on dark backgrounds.
+- Move Mermaid execution from visitors to an explicit build-only compiler; checked-in SVG and external CSS are verified against every immutable diagram source.
 
-- Retain the published 1.0.0 snapshot unchanged; component and trust boundaries are unchanged.
+- Remove all SVG style elements/style attributes and runtime inline zoom styles. Preserve the host style-src self policy.
+
+- Render only exact known source/asset matches and show a visible source fallback when the matching compiled diagram is unavailable.
+
+- Support keyboard-scrollable diagrams, stylesheet-based 100-500 percent zoom and a Fit reset.

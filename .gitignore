@@ -16,3 +16,16 @@ output/
 *.env
 .tools/
 .mypy_cache/
+
+# Private local runtime and verification artifacts
+.env*
+!.env.example
+.local/
+*.secret
+*.secret.json
+*.db
+*.db-*
+*.sqlite*
+*.dump
+*.log
+.DS_Store

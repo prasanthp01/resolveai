@@ -1,6 +1,56 @@
 {
-  "current": "1.0.1",
+  "current": "2.0.8",
   "versions": [
+    {
+      "version": "2.0.8",
+      "date": "2026-10-13",
+      "summary": "Architecture diagrams use build-time SVG assets and external styles so the strict Portfolio CSP preserves readable labels, edges and zoom controls."
+    },
+    {
+      "version": "2.0.7",
+      "date": "2026-10-13",
+      "summary": "Canonical result semantics with reproducible SDK date-time validation; recovered faults and historical provenance remain intact."
+    },
+    {
+      "version": "2.0.6",
+      "date": "2026-10-13",
+      "summary": "Canonical successful results retain recovered faults as warnings and diagnostic evidence; historical recordings keep their original provenance."
+    },
+    {
+      "version": "2.0.5",
+      "date": "2026-10-13",
+      "summary": "Shared Portfolio and full-app simulation with cancellation enabled only after the server admits the current run."
+    },
+    {
+      "version": "2.0.4",
+      "date": "2026-10-13",
+      "summary": "The Portfolio and full application share one versioned simulation widget, including every input, stage, error and result explanation."
+    },
+    {
+      "version": "2.0.3",
+      "date": "2026-10-13",
+      "summary": "Study all nine processing stages and the final result in plain language or technical detail, with inputs, work, outputs, error handling and observed run evidence kept distinct."
+    },
+    {
+      "version": "2.0.2",
+      "date": "2026-10-13",
+      "summary": "Guided synthetic inputs with plain-language definitions, examples, schema-derived valid ranges and rule effects in form and JSON views."
+    },
+    {
+      "version": "2.0.1",
+      "date": "2026-10-13",
+      "summary": "Clarify public versus private lifecycle labels and enforce project identity at the UI boundary."
+    },
+    {
+      "version": "2.0.0",
+      "date": "2026-10-13",
+      "summary": "Server-executed editable sandbox, owned runs, event streaming, failure handling and staged path migration."
+    },
+    {
+      "version": "1.1.0",
+      "date": "2026-10-13",
+      "summary": "Editable incident simulation, exception journeys, verified backend recordings and concurrent duplicate recovery."
+    },
     {
       "version": "1.0.1",
       "date": "2026-10-13",
@@ -12,5 +62,5 @@
       "summary": "Initial evidence-first investigation architecture and study guide."
     }
   ],
-  "source_commit": "330426a578102802716bffb317c8c65630c443c8"
+  "source_commit": "d6b7736d0e34958c4b619678ccb6c970b52a6cd9"
 }

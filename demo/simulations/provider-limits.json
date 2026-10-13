@@ -1,0 +1,304 @@
+{
+  "schema_version": "1.0.0",
+  "app_version": "0.3.0",
+  "slug": "provider-limits",
+  "title": "Upstream provider rate limiting",
+  "recording": {
+    "recorded_at": "2026-10-13T11:15:02.246745+00:00",
+    "mode": "verified-synthetic-replay",
+    "method": "Real FastAPI handlers via ASGITransport and PostgreSQL; worker claim, gather and complete invoked individually. Fixture evidence; no model or external connector calls.",
+    "code_fingerprint": "7fd798ebd1924278714a271a03b4fc53f3f2df24808bd31a15530ad8ede0c12c",
+    "timing_note": "Timestamps are from the local capture. Replay pacing is a teaching aid, not a latency benchmark."
+  },
+  "request": {
+    "method": "POST",
+    "path": "/api/v1/events",
+    "headers": {
+      "Authorization": "Bearer <integration-token>",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "event_id": "simulation-provider-limits",
+      "service": "notification-api",
+      "error_rate": 12,
+      "message": "An external provider returns rate-limit responses while local dependencies remain healthy.",
+      "mode": "fixture",
+      "scenario": "provider-limits"
+    }
+  },
+  "accepted": {
+    "http_status": 202,
+    "request_id": "24dd600f-a897-4ef9-97c3-cf5dffa56f7f",
+    "body": {
+      "id": "682f574b-6c51-4638-a972-d39b5301da37",
+      "status": "QUEUED",
+      "duplicate": false
+    }
+  },
+  "states": {
+    "queued": {
+      "incident_id": "682f574b-6c51-4638-a972-d39b5301da37",
+      "incident_status": "QUEUED",
+      "severity": "HIGH",
+      "job_id": "0671a0fb-7439-4a6b-b943-67f59082da71",
+      "job_status": "PENDING",
+      "attempts": 0,
+      "claim_version": 0,
+      "lease_until": null
+    },
+    "claimed": {
+      "incident_id": "682f574b-6c51-4638-a972-d39b5301da37",
+      "incident_status": "INVESTIGATING",
+      "severity": "HIGH",
+      "job_id": "0671a0fb-7439-4a6b-b943-67f59082da71",
+      "job_status": "CLAIMED",
+      "attempts": 1,
+      "claim_version": 1,
+      "lease_until": "2026-10-13T11:16:02.176307+00:00"
+    },
+    "completed": {
+      "incident_id": "682f574b-6c51-4638-a972-d39b5301da37",
+      "incident_status": "REPORT_READY",
+      "severity": "HIGH",
+      "job_id": "0671a0fb-7439-4a6b-b943-67f59082da71",
+      "job_status": "SUCCEEDED",
+      "attempts": 1,
+      "claim_version": 1,
+      "lease_until": null
+    }
+  },
+  "claim": {
+    "id": "0671a0fb-7439-4a6b-b943-67f59082da71",
+    "incident_id": "682f574b-6c51-4638-a972-d39b5301da37",
+    "version": 1,
+    "owner": "simulation-worker",
+    "run_id": "45371a3d-7f61-4d56-ad4f-17a043c9ce9c",
+    "attempt": 1
+  },
+  "evidence": [
+    {
+      "id": "15e707ad-7230-448e-8961-4fdec33e7b92",
+      "source": "upstream.metrics",
+      "data": {
+        "status_429": 124,
+        "status_503": 8,
+        "retry_after_seconds": 30
+      },
+      "observed_at": "2026-10-13T11:15:02.143407+00:00"
+    },
+    {
+      "id": "15e83fe6-336c-491a-8034-7869bffca3be",
+      "source": "application.metrics",
+      "data": {
+        "error_rate": 12,
+        "queue_delay_ms": 3200
+      },
+      "observed_at": "2026-10-13T11:15:02.143407+00:00"
+    },
+    {
+      "id": "1a65e096-00d3-4d21-8512-4574d0bf5878",
+      "source": "redis.metrics",
+      "data": {
+        "used_memory": 12000000,
+        "maxmemory": 100000000,
+        "evicted_keys": 0
+      },
+      "observed_at": "2026-10-13T11:15:02.143407+00:00"
+    }
+  ],
+  "analysis": {
+    "report": {
+      "summary": "notification-api: Evidence supports upstream rate limiting.",
+      "severity": "HIGH",
+      "impact": "12% reported error rate; affected user count is unknown.",
+      "hypotheses": [
+        {
+          "title": "Upstream rate limiting",
+          "rationale": "Rate-limit responses are present in upstream telemetry. Respect the observed Retry-After interval.",
+          "evidence_ids": [
+            "15e707ad-7230-448e-8961-4fdec33e7b92"
+          ]
+        }
+      ],
+      "supporting_evidence_ids": [
+        "15e707ad-7230-448e-8961-4fdec33e7b92"
+      ],
+      "contradicting_evidence_ids": [],
+      "uncertainty": "Synthetic evidence and deterministic analysis do not establish a production root cause. Alternative causes remain possible.",
+      "recommended_next_steps": [
+        "Compare the incident time window against independent application telemetry.",
+        "Have an operator review the evidence and proposed response before making changes."
+      ],
+      "investigation_mode": "fixture",
+      "started_at": "2026-10-13T11:15:02.178506+00:00",
+      "completed_at": "2026-10-13T11:15:02.199853+00:00"
+    },
+    "citations_validated": true,
+    "live_model_called": false
+  },
+  "final_response": {
+    "http_status": 200,
+    "request_id": "7f1c1cae-e80c-418c-96e5-36c7d8c6fe45",
+    "body": {
+      "status": "REPORT_READY",
+      "report": {
+        "summary": "notification-api: Evidence supports upstream rate limiting.",
+        "severity": "HIGH",
+        "impact": "12% reported error rate; affected user count is unknown.",
+        "hypotheses": [
+          {
+            "title": "Upstream rate limiting",
+            "rationale": "Rate-limit responses are present in upstream telemetry. Respect the observed Retry-After interval.",
+            "evidence_ids": [
+              "15e707ad-7230-448e-8961-4fdec33e7b92"
+            ]
+          }
+        ],
+        "supporting_evidence_ids": [
+          "15e707ad-7230-448e-8961-4fdec33e7b92"
+        ],
+        "contradicting_evidence_ids": [],
+        "uncertainty": "Synthetic evidence and deterministic analysis do not establish a production root cause. Alternative causes remain possible.",
+        "recommended_next_steps": [
+          "Compare the incident time window against independent application telemetry.",
+          "Have an operator review the evidence and proposed response before making changes."
+        ],
+        "investigation_mode": "fixture",
+        "started_at": "2026-10-13T11:15:02.178506+00:00",
+        "completed_at": "2026-10-13T11:15:02.199853+00:00"
+      },
+      "evidence": [
+        {
+          "id": "15e707ad-7230-448e-8961-4fdec33e7b92",
+          "source": "upstream.metrics",
+          "data": {
+            "status_429": 124,
+            "status_503": 8,
+            "retry_after_seconds": 30
+          },
+          "observed_at": "2026-10-13T11:15:02.143407+00:00"
+        },
+        {
+          "id": "15e83fe6-336c-491a-8034-7869bffca3be",
+          "source": "application.metrics",
+          "data": {
+            "error_rate": 12,
+            "queue_delay_ms": 3200
+          },
+          "observed_at": "2026-10-13T11:15:02.143407+00:00"
+        },
+        {
+          "id": "1a65e096-00d3-4d21-8512-4574d0bf5878",
+          "source": "redis.metrics",
+          "data": {
+            "used_memory": 12000000,
+            "maxmemory": 100000000,
+            "evicted_keys": 0
+          },
+          "observed_at": "2026-10-13T11:15:02.143407+00:00"
+        }
+      ]
+    }
+  },
+  "audit": [
+    {
+      "id": "e288fa09-3317-49c9-9746-75f22187aca1",
+      "actor": "80df170e-bbce-47f6-8ec1-f6ac6d654e45",
+      "action": "INCIDENT_ACCEPTED",
+      "details": {
+        "status": "QUEUED"
+      },
+      "created_at": "2026-10-13T11:15:02.151046+00:00"
+    },
+    {
+      "id": "3b5c5388-e39a-4665-b9d9-3dee5585ca9d",
+      "actor": "simulation-worker",
+      "action": "JOB_CLAIMED",
+      "details": {
+        "claim_version": 1,
+        "attempt": 1
+      },
+      "created_at": "2026-10-13T11:15:02.180050+00:00"
+    },
+    {
+      "id": "1f556287-4ffc-4872-b73f-9f1f4e9eb543",
+      "actor": "simulation-worker",
+      "action": "REPORT_SAVED",
+      "details": {
+        "status": "REPORT_READY",
+        "evidence_count": 3,
+        "connector_steps": [],
+        "mode": "fixture"
+      },
+      "created_at": "2026-10-13T11:15:02.204561+00:00"
+    }
+  ],
+  "edge_cases": {
+    "duplicate": {
+      "http_status": 200,
+      "request_id": "1d934cdb-db81-4230-bbe9-84f856408c11",
+      "body": {
+        "id": "682f574b-6c51-4638-a972-d39b5301da37",
+        "status": "QUEUED",
+        "duplicate": true
+      }
+    },
+    "conflict": {
+      "http_status": 409,
+      "request_id": "61c25734-af69-4733-ae01-d9daf9ccb04e",
+      "body": {
+        "code": "409",
+        "message": "Event ID reused with a different payload",
+        "request_id": "61c25734-af69-4733-ae01-d9daf9ccb04e"
+      }
+    },
+    "invalid": {
+      "http_status": 422,
+      "request_id": "dcb624cb-2fee-4af6-ad20-4182f4f544f3",
+      "body": {
+        "code": "VALIDATION_ERROR",
+        "message": "Invalid request fields",
+        "fields": [
+          {
+            "field": "body.error_rate",
+            "type": "less_than_equal"
+          }
+        ],
+        "request_id": "dcb624cb-2fee-4af6-ad20-4182f4f544f3"
+      }
+    },
+    "unauthorized": {
+      "http_status": 401,
+      "request_id": "ca4e66e3-eaba-423f-924f-eee041b97f83",
+      "body": {
+        "code": "401",
+        "message": "Integration token required",
+        "request_id": "ca4e66e3-eaba-423f-924f-eee041b97f83"
+      }
+    },
+    "unchanged_counts": {
+      "incidents_before": 7,
+      "incidents_after": 7,
+      "jobs_after": 7
+    },
+    "invalid_citation_rejected": true,
+    "lease_recovery": {
+      "fault": "Test harness forced the first worker lease into the past on a separate synthetic incident.",
+      "old_claim_version": 1,
+      "new_claim_version": 2,
+      "stale_worker_saved": false,
+      "replacement_worker_saved": true,
+      "persisted_report_count": 1,
+      "final_state": {
+        "incident_id": "0608ddba-81f2-4ddf-ac22-8b2b155f7b3a",
+        "incident_status": "REPORT_READY",
+        "severity": "HIGH",
+        "job_id": "8c07d915-64b5-40f5-9e35-f62381730524",
+        "job_status": "SUCCEEDED",
+        "attempts": 2,
+        "claim_version": 2,
+        "lease_until": null
+      }
+    }
+  }
+}

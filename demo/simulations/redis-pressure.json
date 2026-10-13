@@ -1,0 +1,302 @@
+{
+  "schema_version": "1.0.0",
+  "app_version": "0.3.0",
+  "slug": "redis-pressure",
+  "title": "Cache memory pressure",
+  "recording": {
+    "recorded_at": "2026-10-13T11:15:02.137663+00:00",
+    "mode": "verified-synthetic-replay",
+    "method": "Real FastAPI handlers via ASGITransport and PostgreSQL; worker claim, gather and complete invoked individually. Fixture evidence; no model or external connector calls.",
+    "code_fingerprint": "7fd798ebd1924278714a271a03b4fc53f3f2df24808bd31a15530ad8ede0c12c",
+    "timing_note": "Timestamps are from the local capture. Replay pacing is a teaching aid, not a latency benchmark."
+  },
+  "request": {
+    "method": "POST",
+    "path": "/api/v1/events",
+    "headers": {
+      "Authorization": "Bearer <integration-token>",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "event_id": "simulation-redis-pressure",
+      "service": "session-api",
+      "error_rate": 18,
+      "message": "Memory pressure and increasing evictions coincide with slower application responses.",
+      "mode": "fixture",
+      "scenario": "redis-pressure"
+    }
+  },
+  "accepted": {
+    "http_status": 202,
+    "request_id": "2cfd5237-9f17-4856-a1e7-578817545432",
+    "body": {
+      "id": "e8cd4a08-8db0-4d6c-a854-0764d131cd97",
+      "status": "QUEUED",
+      "duplicate": false
+    }
+  },
+  "states": {
+    "queued": {
+      "incident_id": "e8cd4a08-8db0-4d6c-a854-0764d131cd97",
+      "incident_status": "QUEUED",
+      "severity": "HIGH",
+      "job_id": "30d3ae02-b285-4bca-8e32-90143ce9e6ac",
+      "job_status": "PENDING",
+      "attempts": 0,
+      "claim_version": 0,
+      "lease_until": null
+    },
+    "claimed": {
+      "incident_id": "e8cd4a08-8db0-4d6c-a854-0764d131cd97",
+      "incident_status": "INVESTIGATING",
+      "severity": "HIGH",
+      "job_id": "30d3ae02-b285-4bca-8e32-90143ce9e6ac",
+      "job_status": "CLAIMED",
+      "attempts": 1,
+      "claim_version": 1,
+      "lease_until": "2026-10-13T11:16:02.072519+00:00"
+    },
+    "completed": {
+      "incident_id": "e8cd4a08-8db0-4d6c-a854-0764d131cd97",
+      "incident_status": "REPORT_READY",
+      "severity": "HIGH",
+      "job_id": "30d3ae02-b285-4bca-8e32-90143ce9e6ac",
+      "job_status": "SUCCEEDED",
+      "attempts": 1,
+      "claim_version": 1,
+      "lease_until": null
+    }
+  },
+  "claim": {
+    "id": "30d3ae02-b285-4bca-8e32-90143ce9e6ac",
+    "incident_id": "e8cd4a08-8db0-4d6c-a854-0764d131cd97",
+    "version": 1,
+    "owner": "simulation-worker",
+    "run_id": "01831e7c-f288-4ca9-8262-298752059121",
+    "attempt": 1
+  },
+  "evidence": [
+    {
+      "id": "6289f49b-c732-4cd1-9972-c2e0f306dc78",
+      "source": "redis.metrics",
+      "data": {
+        "used_memory": 99000000,
+        "maxmemory": 100000000,
+        "evicted_keys": 18000
+      },
+      "observed_at": "2026-10-13T11:15:02.043240+00:00"
+    },
+    {
+      "id": "da665f13-e0a9-41cb-ba79-d00e24d43d7e",
+      "source": "application.metrics",
+      "data": {
+        "error_rate": 18,
+        "p95_ms": 1900,
+        "cache_hit_ratio": 0.31
+      },
+      "observed_at": "2026-10-13T11:15:02.043240+00:00"
+    },
+    {
+      "id": "053554a5-f8e1-4f76-87ea-80412d04ecb2",
+      "source": "deployment.events",
+      "data": {
+        "recent_deployment": false
+      },
+      "observed_at": "2026-10-13T11:15:02.043240+00:00"
+    }
+  ],
+  "analysis": {
+    "report": {
+      "summary": "session-api: Evidence supports redis memory pressure.",
+      "severity": "HIGH",
+      "impact": "18% reported error rate; affected user count is unknown.",
+      "hypotheses": [
+        {
+          "title": "Redis memory pressure",
+          "rationale": "Memory utilization is high and evictions are present. Counter deltas would strengthen the time correlation.",
+          "evidence_ids": [
+            "6289f49b-c732-4cd1-9972-c2e0f306dc78"
+          ]
+        }
+      ],
+      "supporting_evidence_ids": [
+        "6289f49b-c732-4cd1-9972-c2e0f306dc78"
+      ],
+      "contradicting_evidence_ids": [],
+      "uncertainty": "Synthetic evidence and deterministic analysis do not establish a production root cause. Alternative causes remain possible.",
+      "recommended_next_steps": [
+        "Compare the incident time window against independent application telemetry.",
+        "Have an operator review the evidence and proposed response before making changes."
+      ],
+      "investigation_mode": "fixture",
+      "started_at": "2026-10-13T11:15:02.073755+00:00",
+      "completed_at": "2026-10-13T11:15:02.081929+00:00"
+    },
+    "citations_validated": true,
+    "live_model_called": false
+  },
+  "final_response": {
+    "http_status": 200,
+    "request_id": "f6b82fba-857e-40d4-b77c-98c48ee4ad56",
+    "body": {
+      "status": "REPORT_READY",
+      "report": {
+        "summary": "session-api: Evidence supports redis memory pressure.",
+        "severity": "HIGH",
+        "impact": "18% reported error rate; affected user count is unknown.",
+        "hypotheses": [
+          {
+            "title": "Redis memory pressure",
+            "rationale": "Memory utilization is high and evictions are present. Counter deltas would strengthen the time correlation.",
+            "evidence_ids": [
+              "6289f49b-c732-4cd1-9972-c2e0f306dc78"
+            ]
+          }
+        ],
+        "supporting_evidence_ids": [
+          "6289f49b-c732-4cd1-9972-c2e0f306dc78"
+        ],
+        "contradicting_evidence_ids": [],
+        "uncertainty": "Synthetic evidence and deterministic analysis do not establish a production root cause. Alternative causes remain possible.",
+        "recommended_next_steps": [
+          "Compare the incident time window against independent application telemetry.",
+          "Have an operator review the evidence and proposed response before making changes."
+        ],
+        "investigation_mode": "fixture",
+        "started_at": "2026-10-13T11:15:02.073755+00:00",
+        "completed_at": "2026-10-13T11:15:02.081929+00:00"
+      },
+      "evidence": [
+        {
+          "id": "6289f49b-c732-4cd1-9972-c2e0f306dc78",
+          "source": "redis.metrics",
+          "data": {
+            "used_memory": 99000000,
+            "maxmemory": 100000000,
+            "evicted_keys": 18000
+          },
+          "observed_at": "2026-10-13T11:15:02.043240+00:00"
+        },
+        {
+          "id": "da665f13-e0a9-41cb-ba79-d00e24d43d7e",
+          "source": "application.metrics",
+          "data": {
+            "error_rate": 18,
+            "p95_ms": 1900,
+            "cache_hit_ratio": 0.31
+          },
+          "observed_at": "2026-10-13T11:15:02.043240+00:00"
+        },
+        {
+          "id": "053554a5-f8e1-4f76-87ea-80412d04ecb2",
+          "source": "deployment.events",
+          "data": {
+            "recent_deployment": false
+          },
+          "observed_at": "2026-10-13T11:15:02.043240+00:00"
+        }
+      ]
+    }
+  },
+  "audit": [
+    {
+      "id": "22c53f94-e96f-4998-949c-1b91260fbae3",
+      "actor": "80df170e-bbce-47f6-8ec1-f6ac6d654e45",
+      "action": "INCIDENT_ACCEPTED",
+      "details": {
+        "status": "QUEUED"
+      },
+      "created_at": "2026-10-13T11:15:02.049154+00:00"
+    },
+    {
+      "id": "bc43475c-518d-4b16-bd06-920ea6df4059",
+      "actor": "simulation-worker",
+      "action": "JOB_CLAIMED",
+      "details": {
+        "claim_version": 1,
+        "attempt": 1
+      },
+      "created_at": "2026-10-13T11:15:02.074608+00:00"
+    },
+    {
+      "id": "e7bc3bea-fe34-4e2a-a305-b291f55408e9",
+      "actor": "simulation-worker",
+      "action": "REPORT_SAVED",
+      "details": {
+        "status": "REPORT_READY",
+        "evidence_count": 3,
+        "connector_steps": [],
+        "mode": "fixture"
+      },
+      "created_at": "2026-10-13T11:15:02.087405+00:00"
+    }
+  ],
+  "edge_cases": {
+    "duplicate": {
+      "http_status": 200,
+      "request_id": "a4bf1708-dc42-40b5-8675-288bbf882823",
+      "body": {
+        "id": "e8cd4a08-8db0-4d6c-a854-0764d131cd97",
+        "status": "QUEUED",
+        "duplicate": true
+      }
+    },
+    "conflict": {
+      "http_status": 409,
+      "request_id": "6f08a706-8120-4867-b4cb-f1b942b360cf",
+      "body": {
+        "code": "409",
+        "message": "Event ID reused with a different payload",
+        "request_id": "6f08a706-8120-4867-b4cb-f1b942b360cf"
+      }
+    },
+    "invalid": {
+      "http_status": 422,
+      "request_id": "d2e97afc-8403-41a3-a440-c9ac3a261af9",
+      "body": {
+        "code": "VALIDATION_ERROR",
+        "message": "Invalid request fields",
+        "fields": [
+          {
+            "field": "body.error_rate",
+            "type": "less_than_equal"
+          }
+        ],
+        "request_id": "d2e97afc-8403-41a3-a440-c9ac3a261af9"
+      }
+    },
+    "unauthorized": {
+      "http_status": 401,
+      "request_id": "3bc10059-a7a6-4578-8318-37eb730678f9",
+      "body": {
+        "code": "401",
+        "message": "Integration token required",
+        "request_id": "3bc10059-a7a6-4578-8318-37eb730678f9"
+      }
+    },
+    "unchanged_counts": {
+      "incidents_before": 5,
+      "incidents_after": 5,
+      "jobs_after": 5
+    },
+    "invalid_citation_rejected": true,
+    "lease_recovery": {
+      "fault": "Test harness forced the first worker lease into the past on a separate synthetic incident.",
+      "old_claim_version": 1,
+      "new_claim_version": 2,
+      "stale_worker_saved": false,
+      "replacement_worker_saved": true,
+      "persisted_report_count": 1,
+      "final_state": {
+        "incident_id": "b154b81f-835b-4ae5-a899-673f73616b22",
+        "incident_status": "REPORT_READY",
+        "severity": "HIGH",
+        "job_id": "2b3dd659-b12b-401f-a891-250e02a33ba8",
+        "job_status": "SUCCEEDED",
+        "attempts": 2,
+        "claim_version": 2,
+        "lease_until": null
+      }
+    }
+  }
+}

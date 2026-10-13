@@ -1,0 +1,17 @@
+{
+  "verified_at": "2026-10-13T10:54:11.756448+00:00",
+  "scope": "local private ASGI runtime and isolated test DB",
+  "api_prefix": "/api/projects/resolveai/v1",
+  "cookie_path": "/api/projects/resolveai",
+  "checks": [
+    "login",
+    "scoped cookie",
+    "authenticated read",
+    "OpenAPI prefix",
+    "legacy API denied",
+    "logout clears session",
+    "deep link",
+    "prefixed logo"
+  ],
+  "result": "PASS"
+}

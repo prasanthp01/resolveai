@@ -1,5 +1,5 @@
-import { useEffect, useId, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+import { Link, useSearchParams } from "react-router-dom";
 import {
   ArrowRight,
   BookOpen,
@@ -8,6 +8,7 @@ import {
   Workflow,
 } from "lucide-react";
 import { api } from "./api";
+import Diagram from "./ArchitectureDiagram";
 type Section = {
   title: string;
   summary: string;
@@ -30,90 +31,6 @@ type Architecture = {
   }[];
   tradeoffs: { decision: string; reason: string; alternative: string }[];
 };
-function Diagram({ source }: { source: string }) {
-  const [svg, setSvg] = useState("");
-  const [zoom, setZoom] = useState(100);
-  const [error, setError] = useState("");
-  const id = useId().replace(/[^a-zA-Z0-9]/g, "");
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      try {
-        const mermaid = (await import("mermaid")).default;
-        mermaid.initialize({
-          startOnLoad: false,
-          suppressErrorRendering: true,
-          securityLevel: "strict",
-          theme: "base",
-          themeVariables: {
-            primaryColor: "#18333e",
-            secondaryColor: "#1b3340",
-            tertiaryColor: "#11232d",
-            clusterBkg: "#152831",
-            clusterBorder: "#416778",
-            edgeLabelBackground: "#162d38",
-            primaryTextColor: "#ebf4f8",
-            lineColor: "#69b7c4",
-            signalColor: "#9cdace",
-            signalTextColor: "#ebf4f8",
-            actorBorder: "#69b7c4",
-            actorTextColor: "#ebf4f8",
-            actorLineColor: "#416778",
-            fontFamily: "system-ui",
-            fontSize: "15px",
-          },
-          flowchart: { htmlLabels: false },
-        });
-        const { svg } = await mermaid.render("diagram" + id, source);
-        if (active) setSvg(svg);
-      } catch {
-        if (active)
-          setError("Diagram could not be rendered. Read its source below.");
-      }
-    })();
-    return () => {
-      active = false;
-    };
-  }, [source, id]);
-  return (
-    <div className="diagram-wrap">
-      {error ? (
-        <p role="alert">{error}</p>
-      ) : (
-        <>
-          <div className="diagram-controls">
-            <button
-              onClick={() => setZoom(Math.max(100, zoom - 25))}
-              disabled={zoom === 100}
-              aria-label="Zoom out diagram"
-            >
-              −
-            </button>
-            <span>{zoom}%</span>
-            <button
-              onClick={() => setZoom(Math.min(250, zoom + 25))}
-              disabled={zoom === 250}
-              aria-label="Zoom in diagram"
-            >
-              +
-            </button>
-            <button onClick={() => setZoom(100)}>Fit</button>
-          </div>
-          <div className="diagram">
-            <div
-              style={{ width: `${zoom}%` }}
-              dangerouslySetInnerHTML={{ __html: svg }}
-            />
-          </div>
-        </>
-      )}
-      <details>
-        <summary>View diagram source</summary>
-        <pre>{source}</pre>
-      </details>
-    </div>
-  );
-}
 function Sections({ items }: { items: Section[] }) {
   return (
     <div className="architecture-sections">
@@ -195,6 +112,12 @@ export default function ArchitecturePage() {
           </select>
         </label>
       </div>
+      <Link
+        className="simulation-link architecture-simulation"
+        to="/simulation"
+      >
+        Try an editable incident simulation <ArrowRight size={16} />
+      </Link>
       <div className="tabs" aria-label="Architecture views">
         {[
           ["high", "High level", Layers],
@@ -235,11 +158,17 @@ export default function ArchitecturePage() {
                 <p>{data.summary}</p>
               </div>
               <h3>Private investigation pipeline</h3>
-              <Diagram source={data.high_level.diagram} />
+              <Diagram
+                source={data.high_level.diagram}
+                title="Private investigation pipeline"
+              />
               {data.high_level.public_diagram && (
                 <>
                   <h3>Public synthetic demo</h3>
-                  <Diagram source={data.high_level.public_diagram} />
+                  <Diagram
+                    source={data.high_level.public_diagram}
+                    title="Public synthetic demo"
+                  />
                 </>
               )}
               <Sections items={data.high_level.sections} />
@@ -262,15 +191,21 @@ export default function ArchitecturePage() {
             <>
               <div className="section-intro">
                 <span className="tag">INSIDE THE REQUEST</span>
-                <h2>Acceptance is a database commitment.</h2>
+                <h2>Follow acceptance and execution.</h2>
                 <p>
-                  Follow the request, then inspect the relationships that keep
-                  its evidence and execution state consistent.
+                  Follow the run lifecycle, then study the separate private data
+                  model and its durable execution guarantees.
                 </p>
               </div>
-              <Diagram source={data.low_level.diagram} />
-              <h2>Data relationships</h2>
-              <Diagram source={data.low_level.data_diagram} />
+              <Diagram
+                source={data.low_level.diagram}
+                title="Acceptance and execution"
+              />
+              <h2>Private investigation data model</h2>
+              <Diagram
+                source={data.low_level.data_diagram}
+                title="Private investigation data model"
+              />
               <Sections items={data.low_level.sections} />
             </>
           )}

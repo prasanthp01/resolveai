@@ -1,0 +1,151 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "service": {
+      "default": "payment-api",
+      "maxLength": 64,
+      "minLength": 1,
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "title": "Service",
+      "type": "string"
+    },
+    "error_rate": {
+      "default": 62,
+      "maximum": 100,
+      "minimum": 0,
+      "title": "Error Rate",
+      "type": "number"
+    },
+    "latency_ms": {
+      "default": 2400,
+      "maximum": 60000,
+      "minimum": 0,
+      "title": "Latency Ms",
+      "type": "integer"
+    },
+    "db_connections": {
+      "default": 96,
+      "maximum": 10000,
+      "minimum": 0,
+      "title": "Db Connections",
+      "type": "integer"
+    },
+    "db_max_connections": {
+      "default": 100,
+      "maximum": 10000,
+      "minimum": 1,
+      "title": "Db Max Connections",
+      "type": "integer"
+    },
+    "db_cpu_percent": {
+      "default": 72,
+      "maximum": 100,
+      "minimum": 0,
+      "title": "Db Cpu Percent",
+      "type": "number"
+    },
+    "db_lock_waiters": {
+      "default": 0,
+      "maximum": 1000,
+      "minimum": 0,
+      "title": "Db Lock Waiters",
+      "type": "integer"
+    },
+    "slow_queries": {
+      "default": 0,
+      "maximum": 1000,
+      "minimum": 0,
+      "title": "Slow Queries",
+      "type": "integer"
+    },
+    "redis_memory_mb": {
+      "default": 200,
+      "maximum": 65536,
+      "minimum": 0,
+      "title": "Redis Memory Mb",
+      "type": "integer"
+    },
+    "redis_maxmemory_mb": {
+      "default": 1024,
+      "maximum": 65536,
+      "minimum": 1,
+      "title": "Redis Maxmemory Mb",
+      "type": "integer"
+    },
+    "redis_evictions": {
+      "default": 0,
+      "maximum": 1000000,
+      "minimum": 0,
+      "title": "Redis Evictions",
+      "type": "integer"
+    },
+    "recent_deployment": {
+      "default": false,
+      "title": "Recent Deployment",
+      "type": "boolean"
+    },
+    "previous_error_rate": {
+      "default": 0.2,
+      "maximum": 100,
+      "minimum": 0,
+      "title": "Previous Error Rate",
+      "type": "number"
+    },
+    "upstream_429": {
+      "default": 0,
+      "maximum": 10000,
+      "minimum": 0,
+      "title": "Upstream 429",
+      "type": "integer"
+    },
+    "retry_after_seconds": {
+      "default": 2,
+      "maximum": 60,
+      "minimum": 0,
+      "title": "Retry After Seconds",
+      "type": "integer"
+    },
+    "log_fixture": {
+      "default": "pool_timeout",
+      "enum": [
+        "pool_timeout",
+        "query_timeout",
+        "cache_miss",
+        "release_error",
+        "upstream_limit",
+        "normal",
+        "injection_attempt"
+      ],
+      "title": "Log Fixture",
+      "type": "string"
+    },
+    "incident_context": {
+      "default": "Synthetic checkout errors",
+      "maxLength": 200,
+      "pattern": "^[a-zA-Z0-9 .,_()\\-]*$",
+      "title": "Incident Context",
+      "type": "string"
+    },
+    "fault": {
+      "default": "none",
+      "enum": [
+        "none",
+        "connector_timeout",
+        "provider_429",
+        "invalid_model_output",
+        "workflow_timeout"
+      ],
+      "title": "Fault",
+      "type": "string"
+    },
+    "seed": {
+      "default": 42,
+      "maximum": 1000000,
+      "minimum": 0,
+      "title": "Seed",
+      "type": "integer"
+    }
+  },
+  "title": "SimulationInput",
+  "type": "object"
+}

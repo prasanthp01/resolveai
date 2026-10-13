@@ -1,0 +1,22 @@
+{
+  "recorded_at": "2026-10-13T11:43:47.349248Z",
+  "source_revision": "19d14e039eb446110147eff0a2cf80268f5d7de2",
+  "application_version": "0.3.0",
+  "architecture_version": "2.0.1",
+  "status": "PASS",
+  "command": "docker --context colima build --platform linux/amd64 -t resolveai:0.3.0 .",
+  "target": "Linux amd64; local host arm64",
+  "typescript": "PASS",
+  "studio_checks": 7,
+  "historical_simulation_assertions": 165,
+  "private_captured_comparisons": 4,
+  "mermaid_diagrams": 20,
+  "vite_build": "PASS",
+  "image_id": "sha256:be768f2281e7aed714c7dc90ec977a91eef5d2fcc72aabeca78a54917f29aa12",
+  "log": {
+    "evidence_id": "release-build-log",
+    "origin": "TEST",
+    "reference": "docs/v4/release-build.log",
+    "sha256": "44183e3d231cbd4481c41b062629c236fc29a037e99d9d39cba1b80a973544d1"
+  }
+}

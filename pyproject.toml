@@ -1,6 +1,6 @@
 [project]
 name = "resolveai"
-version = "0.1.0"
+version = "0.3.7"
 description = "Evidence-first incident investigation with a synthetic public demo"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -17,14 +17,23 @@ dependencies = [
     "redis>=6,<8",
 ]
 [dependency-groups]
-dev = ["pytest>=8,<10", "pytest-asyncio>=0.26,<2", "ruff>=0.11", "pip-audit>=2.9", "mypy>=1.15"]
+dev = [
+    "pytest>=8,<10",
+    "pytest-asyncio>=0.26,<2",
+    "ruff>=0.11",
+    "pip-audit>=2.9",
+    "mypy>=1.15",
+    "jsonschema==4.26.0",
+    "rfc3339-validator==0.1.4",
+]
 [tool.pytest.ini_options]
-pythonpath = ["."]
+pythonpath = [".", "tests/vendor"]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "session"
 asyncio_default_test_loop_scope = "session"
 testpaths = ["tests"]
 [tool.ruff]
+extend-exclude = ["tests/vendor"]
 line-length = 110
 [tool.ruff.lint]
 select = ["E4", "E7", "E9", "F"]

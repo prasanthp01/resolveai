@@ -1,0 +1,45 @@
+{
+  "verified_at": "2026-10-13T11:33:41.632915+00:00",
+  "scope": "Concurrent Portfolio cutover observed; legacy ResolveAI assets are retained. ResolveAI v4 API is not yet connected.",
+  "checks": [
+    {
+      "path": "/",
+      "status": 200,
+      "content_type": "text/html"
+    },
+    {
+      "path": "/architecture",
+      "status": 200,
+      "content_type": "text/html"
+    },
+    {
+      "path": "/simulation",
+      "status": 200,
+      "content_type": "text/html"
+    },
+    {
+      "path": "/api/v1/config",
+      "status": 200,
+      "content_type": "application/json",
+      "body": {
+        "demo": true,
+        "version": "0.2.0",
+        "build_sha": "0b0e32acada6dd7112158af2e1c39fddb13244f5",
+        "live_ai_enabled": false
+      }
+    },
+    {
+      "path": "/projects/resolveai",
+      "status": 200,
+      "content_type": "text/html"
+    },
+    {
+      "path": "/api/projects/resolveai/simulation/schema",
+      "status": 503,
+      "content_type": "application/json",
+      "body": {
+        "code": "PROJECT_NOT_CONNECTED"
+      }
+    }
+  ]
+}

@@ -39,9 +39,11 @@ import {
 import { api, download, Scenario, Report, Evidence, Incident } from "./api";
 import "./styles.css";
 const Architecture = lazy(() => import("./Architecture"));
+const Simulation = lazy(() => import("./Studio"));
+const CaseStudy = lazy(() => import("./CaseStudy"));
 const Config = createContext({
   demo: true,
-  version: "0.1.0",
+  version: "0.3.0",
   build_sha: "development",
   live_ai_enabled: false,
 });
@@ -64,7 +66,7 @@ function ErrorMessage({ message }: { message: string }) {
 function App() {
   const [config, setConfig] = useState({
     demo: true,
-    version: "0.1.0",
+    version: "0.3.0",
     build_sha: "development",
     live_ai_enabled: false,
   });
@@ -91,7 +93,7 @@ function App() {
           </button>
           <Link to="/" className="brand" aria-label="ResolveAI home">
             <img
-              src="/resolveai-logo.png"
+              src={import.meta.env.BASE_URL + "resolveai-logo.png"}
               alt="ResolveAI"
               width="183"
               height="61"
@@ -111,6 +113,7 @@ function App() {
             {[
               ["/", "Overview", LayoutDashboard],
               ["/incidents", "Incidents", Activity],
+              ["/simulation", "Simulation", Play],
               ["/integrations", "Integrations", Plug],
               ["/operations", "Operations", Shield],
               ["/architecture", "Architecture", BookOpen],
@@ -173,6 +176,7 @@ function App() {
                 <Route path="/demo/:slug" element={<DemoDetail />} />
                 <Route path="/incidents/:id" element={<PrivateDetail />} />
                 <Route path="/architecture" element={<Architecture />} />
+                <Route path="/simulation" element={<Simulation />} />
                 <Route path="/integrations" element={<Integrations />} />
                 <Route path="/operations" element={<Operations />} />
                 <Route path="/login" element={<Login />} />
@@ -632,6 +636,12 @@ function DemoDetail() {
             </span>
           </div>
           <div className="toolbar compact">
+            <Link
+              className="simulation-link"
+              to={"/simulation?scenario=" + data.slug}
+            >
+              Study each stage <ArrowRight size={15} />
+            </Link>
             <button
               className="primary"
               disabled={playing}
@@ -1390,7 +1400,21 @@ function Operations() {
   );
 }
 createRoot(document.getElementById("root")!).render(
-  <BrowserRouter>
-    <App />
+  <BrowserRouter
+    basename={
+      location.pathname.startsWith("/projects/resolveai/app")
+        ? "/projects/resolveai/app"
+        : "/"
+    }
+  >
+    {["/projects/resolveai", "/projects/resolveai/app/studio"].includes(
+      location.pathname.replace(/\/$/, ""),
+    ) ? (
+      <Suspense fallback={<p>Loading ResolveAI…</p>}>
+        <CaseStudy />
+      </Suspense>
+    ) : (
+      <App />
+    )}
   </BrowserRouter>,
 );

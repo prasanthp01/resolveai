@@ -1,0 +1,13 @@
+{
+  "verified_at": "2026-10-13T11:24:43.850391+00:00",
+  "target": "authorized ResolveAI VPS",
+  "disk_total_bytes": 50839412736,
+  "disk_free_bytes": 1167208448,
+  "disk_percent_used": 97.67,
+  "memory_available_mib": 2036.5,
+  "trivy_db_cache": "already empty; no recoverable capacity from previously authorized cleanup",
+  "release_runtime": "NOT_INSTALLED",
+  "public_route_cutover": "NOT_PERFORMED",
+  "status": "BLOCKED",
+  "reason": "Shared host root filesystem is nearly full; additional runtime installation requires recovered or expanded capacity. Shared routing remains Integration-owned."
+}

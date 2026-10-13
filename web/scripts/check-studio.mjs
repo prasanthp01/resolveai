@@ -1,0 +1,32 @@
+import assert from 'node:assert/strict';
+import {build} from 'esbuild';
+const {outputFiles}=await build({entryPoints:['src/studioClient.ts'],bundle:true,write:false,format:'esm',platform:'browser'});
+const {mergeSteps}=await import('data:text/javascript;base64,'+Buffer.from(outputFiles[0].text).toString('base64'));
+const event=(sequence)=>({project_id:'resolveai',run_id:'run',event_id:'run:'+sequence,sequence,mode:'SANDBOX_DETERMINISTIC'});
+assert.deepEqual(mergeSteps([event(2)],[event(1)],'run'),[event(1),event(2)]);
+assert.deepEqual(mergeSteps([event(1)],[event(1)],'run'),[event(1)]);
+assert.throws(()=>mergeSteps([event(1)],[{...event(1),title:'conflict'}],'run'),/Conflicting/);
+assert.throws(()=>mergeSteps([],[event(1)],'other'),/Incompatible/);
+assert.throws(()=>mergeSteps([],[event(41)],'run'),/Incompatible/);
+assert.throws(()=>mergeSteps([],[{...event(1),mode:'LIVE_MODEL_AUTHENTICATED'}],'run'),/Incompatible/);
+assert.throws(()=>mergeSteps([],[{...event(1),project_id:'flowops'}],'run'),/Incompatible/);
+console.log('7 studio event-order, deduplication, ownership, mode and conflict checks passed.');
+
+const helpBuild = await build({entryPoints:['src/studioProcessHelp.ts'],bundle:true,write:false,format:'esm',platform:'browser'});
+const {stageOutcome,hasCompletedReport,resultOutcome,observedStageOutput}=await import('data:text/javascript;base64,'+Buffer.from(helpBuild.outputFiles[0].text).toString('base64'));
+// A recovered checkpoint must not disguise a terminal failure or cancellation.
+assert.equal(stageOutcome([],undefined).label,'Not started');
+assert.match(stageOutcome([],'FAILED').label,/Not reached/);
+assert.equal(stageOutcome([{status:'FAILED'},{status:'STARTED'},{status:'SUCCEEDED'}],'SUCCEEDED').label,'Completed with a warning');
+assert.equal(stageOutcome([{status:'WAITING'},{status:'FAILED'}],'FAILED').label,'Failed — workflow stopped');
+assert.equal(stageOutcome([{status:'BLOCKED'}],'CANCELLED').label,'Cancelled at this stage');
+const incomplete={status:'FAILED',errors:[{code:'RUN_TIMEOUT'}],warnings:['Run timed out'],output:{summary:'Run ended without a report.',step_details:[]}};
+const abstained={status:'SUCCEEDED',errors:[],warnings:[],output:{faults:[],severity:'HIGH',hypotheses:[],step_details:[]}};
+assert.equal(hasCompletedReport(incomplete),false);
+assert.equal(hasCompletedReport(abstained),true);
+assert.match(resultOutcome(incomplete),/no completed report/);
+assert.match(resultOutcome({...abstained,warnings:['Connector timed out'],output:{...abstained.output,faults:[{code:'CONNECTOR_TIMEOUT'}]}}),/warnings/);
+assert.equal(observedStageOutput('metrics',[{sequence:9,status:'FAILED'}],incomplete),null);
+const recorded={...abstained,output:{...abstained.output,step_details:[{sequence:8,technical:{input:{error_rate:62},output:{severity:'CRITICAL'}}}]}};
+assert.equal(observedStageOutput('severity',[{sequence:8,status:'SUCCEEDED'}],recorded),'62% errors produced CRITICAL severity.');
+console.log('11 stage/result outcome checks passed: pre-run, warning, failure, cancellation, abstention and recorded output.');

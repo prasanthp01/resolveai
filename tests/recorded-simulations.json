@@ -1,0 +1,26 @@
+{
+  "source_commit": "61efb7797141e27e47a7a63c2399026d85eb63c4",
+  "note": "Immutable 0.3.0 private-backend recordings. Hashes and recorded metadata checked independently of the current app. Source fingerprint verified against this historical Git tree.",
+  "recordings": {
+    "postgres-saturation.json": {
+      "sha256": "2bd1a8c0e5700060c5b03585b691b9e6c45ced47cc091649d9c33a5ae5710629",
+      "app_version": "0.3.0",
+      "code_fingerprint": "7fd798ebd1924278714a271a03b4fc53f3f2df24808bd31a15530ad8ede0c12c"
+    },
+    "provider-limits.json": {
+      "sha256": "f39b660b3988c57fb3958756bd246e4d56b805f6f4616d6a604d3178074a81cb",
+      "app_version": "0.3.0",
+      "code_fingerprint": "7fd798ebd1924278714a271a03b4fc53f3f2df24808bd31a15530ad8ede0c12c"
+    },
+    "redis-pressure.json": {
+      "sha256": "4bcdb2eaf2f0d7ff48e47ac500adf85450b1c98e398f2e321458c9baa1c364ff",
+      "app_version": "0.3.0",
+      "code_fingerprint": "7fd798ebd1924278714a271a03b4fc53f3f2df24808bd31a15530ad8ede0c12c"
+    },
+    "release-regression.json": {
+      "sha256": "e27191a60f0177dd6fe3ab2eb9a2e768d0b130e553e6edb3503ba6e969efe395",
+      "app_version": "0.3.0",
+      "code_fingerprint": "7fd798ebd1924278714a271a03b4fc53f3f2df24808bd31a15530ad8ede0c12c"
+    }
+  }
+}

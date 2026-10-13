@@ -1,0 +1,306 @@
+{
+  "schema_version": "1.0.0",
+  "app_version": "0.3.0",
+  "slug": "release-regression",
+  "title": "Errors following a release",
+  "recording": {
+    "recorded_at": "2026-10-13T11:15:02.037623+00:00",
+    "mode": "verified-synthetic-replay",
+    "method": "Real FastAPI handlers via ASGITransport and PostgreSQL; worker claim, gather and complete invoked individually. Fixture evidence; no model or external connector calls.",
+    "code_fingerprint": "7fd798ebd1924278714a271a03b4fc53f3f2df24808bd31a15530ad8ede0c12c",
+    "timing_note": "Timestamps are from the local capture. Replay pacing is a teaching aid, not a latency benchmark."
+  },
+  "request": {
+    "method": "POST",
+    "path": "/api/v1/events",
+    "headers": {
+      "Authorization": "Bearer <integration-token>",
+      "Content-Type": "application/json"
+    },
+    "body": {
+      "event_id": "simulation-release-regression",
+      "service": "catalog-api",
+      "error_rate": 46,
+      "message": "A new application version correlates with a sharp rise in server errors.",
+      "mode": "fixture",
+      "scenario": "release-regression"
+    }
+  },
+  "accepted": {
+    "http_status": 202,
+    "request_id": "30a6b4ce-7585-4b86-91ef-0ce202fc5f3c",
+    "body": {
+      "id": "303e5d9a-4ca4-47fe-a314-4c565043f8e5",
+      "status": "QUEUED",
+      "duplicate": false
+    }
+  },
+  "states": {
+    "queued": {
+      "incident_id": "303e5d9a-4ca4-47fe-a314-4c565043f8e5",
+      "incident_status": "QUEUED",
+      "severity": "HIGH",
+      "job_id": "ffbc82bf-ab70-4833-9ce4-4872408a64d6",
+      "job_status": "PENDING",
+      "attempts": 0,
+      "claim_version": 0,
+      "lease_until": null
+    },
+    "claimed": {
+      "incident_id": "303e5d9a-4ca4-47fe-a314-4c565043f8e5",
+      "incident_status": "INVESTIGATING",
+      "severity": "HIGH",
+      "job_id": "ffbc82bf-ab70-4833-9ce4-4872408a64d6",
+      "job_status": "CLAIMED",
+      "attempts": 1,
+      "claim_version": 1,
+      "lease_until": "2026-10-13T11:16:01.989313+00:00"
+    },
+    "completed": {
+      "incident_id": "303e5d9a-4ca4-47fe-a314-4c565043f8e5",
+      "incident_status": "REPORT_READY",
+      "severity": "HIGH",
+      "job_id": "ffbc82bf-ab70-4833-9ce4-4872408a64d6",
+      "job_status": "SUCCEEDED",
+      "attempts": 1,
+      "claim_version": 1,
+      "lease_until": null
+    }
+  },
+  "claim": {
+    "id": "ffbc82bf-ab70-4833-9ce4-4872408a64d6",
+    "incident_id": "303e5d9a-4ca4-47fe-a314-4c565043f8e5",
+    "version": 1,
+    "owner": "simulation-worker",
+    "run_id": "d6a6e951-f243-4a01-9d46-b02ee5ef684b",
+    "attempt": 1
+  },
+  "evidence": [
+    {
+      "id": "16a6443d-6c54-4593-97ff-103acc82ef53",
+      "source": "deployment.events",
+      "data": {
+        "recent_deployment": true,
+        "previous_error_rate": 0.2,
+        "current_version": "2.8.1",
+        "previous_version": "2.8.0"
+      },
+      "observed_at": "2026-10-13T11:15:01.966527+00:00"
+    },
+    {
+      "id": "837b12d1-1e0e-492b-8ce7-386da6b22e7d",
+      "source": "application.metrics",
+      "data": {
+        "error_rate": 46,
+        "new_exception_count": 142
+      },
+      "observed_at": "2026-10-13T11:15:01.966527+00:00"
+    },
+    {
+      "id": "8daefa12-6261-421b-9845-7a86b0f70b78",
+      "source": "postgres.metrics",
+      "data": {
+        "connections": 18,
+        "max_connections": 100,
+        "waiting": 0
+      },
+      "observed_at": "2026-10-13T11:15:01.966527+00:00"
+    }
+  ],
+  "analysis": {
+    "report": {
+      "summary": "catalog-api: Evidence supports release-related regression.",
+      "severity": "HIGH",
+      "impact": "46% reported error rate; affected user count is unknown.",
+      "hypotheses": [
+        {
+          "title": "Release-related regression",
+          "rationale": "Errors follow a release whose predecessor had a low error rate. Temporal correlation warrants a version comparison.",
+          "evidence_ids": [
+            "16a6443d-6c54-4593-97ff-103acc82ef53"
+          ]
+        }
+      ],
+      "supporting_evidence_ids": [
+        "16a6443d-6c54-4593-97ff-103acc82ef53"
+      ],
+      "contradicting_evidence_ids": [],
+      "uncertainty": "Synthetic evidence and deterministic analysis do not establish a production root cause. Alternative causes remain possible.",
+      "recommended_next_steps": [
+        "Compare the incident time window against independent application telemetry.",
+        "Have an operator review the evidence and proposed response before making changes."
+      ],
+      "investigation_mode": "fixture",
+      "started_at": "2026-10-13T11:15:01.990329+00:00",
+      "completed_at": "2026-10-13T11:15:01.996156+00:00"
+    },
+    "citations_validated": true,
+    "live_model_called": false
+  },
+  "final_response": {
+    "http_status": 200,
+    "request_id": "8fe7a0a3-1434-4721-a4f8-e81dba74f2ed",
+    "body": {
+      "status": "REPORT_READY",
+      "report": {
+        "summary": "catalog-api: Evidence supports release-related regression.",
+        "severity": "HIGH",
+        "impact": "46% reported error rate; affected user count is unknown.",
+        "hypotheses": [
+          {
+            "title": "Release-related regression",
+            "rationale": "Errors follow a release whose predecessor had a low error rate. Temporal correlation warrants a version comparison.",
+            "evidence_ids": [
+              "16a6443d-6c54-4593-97ff-103acc82ef53"
+            ]
+          }
+        ],
+        "supporting_evidence_ids": [
+          "16a6443d-6c54-4593-97ff-103acc82ef53"
+        ],
+        "contradicting_evidence_ids": [],
+        "uncertainty": "Synthetic evidence and deterministic analysis do not establish a production root cause. Alternative causes remain possible.",
+        "recommended_next_steps": [
+          "Compare the incident time window against independent application telemetry.",
+          "Have an operator review the evidence and proposed response before making changes."
+        ],
+        "investigation_mode": "fixture",
+        "started_at": "2026-10-13T11:15:01.990329+00:00",
+        "completed_at": "2026-10-13T11:15:01.996156+00:00"
+      },
+      "evidence": [
+        {
+          "id": "16a6443d-6c54-4593-97ff-103acc82ef53",
+          "source": "deployment.events",
+          "data": {
+            "recent_deployment": true,
+            "previous_error_rate": 0.2,
+            "current_version": "2.8.1",
+            "previous_version": "2.8.0"
+          },
+          "observed_at": "2026-10-13T11:15:01.966527+00:00"
+        },
+        {
+          "id": "837b12d1-1e0e-492b-8ce7-386da6b22e7d",
+          "source": "application.metrics",
+          "data": {
+            "error_rate": 46,
+            "new_exception_count": 142
+          },
+          "observed_at": "2026-10-13T11:15:01.966527+00:00"
+        },
+        {
+          "id": "8daefa12-6261-421b-9845-7a86b0f70b78",
+          "source": "postgres.metrics",
+          "data": {
+            "connections": 18,
+            "max_connections": 100,
+            "waiting": 0
+          },
+          "observed_at": "2026-10-13T11:15:01.966527+00:00"
+        }
+      ]
+    }
+  },
+  "audit": [
+    {
+      "id": "c86eee4d-9d69-46a2-a014-fc3923b402b1",
+      "actor": "80df170e-bbce-47f6-8ec1-f6ac6d654e45",
+      "action": "INCIDENT_ACCEPTED",
+      "details": {
+        "status": "QUEUED"
+      },
+      "created_at": "2026-10-13T11:15:01.971069+00:00"
+    },
+    {
+      "id": "5331850d-5157-4b27-9c22-75ee603f2d88",
+      "actor": "simulation-worker",
+      "action": "JOB_CLAIMED",
+      "details": {
+        "claim_version": 1,
+        "attempt": 1
+      },
+      "created_at": "2026-10-13T11:15:01.991085+00:00"
+    },
+    {
+      "id": "27befc19-79a1-4fac-93fd-6c667b0af4e2",
+      "actor": "simulation-worker",
+      "action": "REPORT_SAVED",
+      "details": {
+        "status": "REPORT_READY",
+        "evidence_count": 3,
+        "connector_steps": [],
+        "mode": "fixture"
+      },
+      "created_at": "2026-10-13T11:15:01.999823+00:00"
+    }
+  ],
+  "edge_cases": {
+    "duplicate": {
+      "http_status": 200,
+      "request_id": "7087df71-884e-4d17-8629-946830223412",
+      "body": {
+        "id": "303e5d9a-4ca4-47fe-a314-4c565043f8e5",
+        "status": "QUEUED",
+        "duplicate": true
+      }
+    },
+    "conflict": {
+      "http_status": 409,
+      "request_id": "c17223f9-6068-4123-b462-6181fea3427f",
+      "body": {
+        "code": "409",
+        "message": "Event ID reused with a different payload",
+        "request_id": "c17223f9-6068-4123-b462-6181fea3427f"
+      }
+    },
+    "invalid": {
+      "http_status": 422,
+      "request_id": "5429dfd8-f75d-465f-a2de-c322bce7363e",
+      "body": {
+        "code": "VALIDATION_ERROR",
+        "message": "Invalid request fields",
+        "fields": [
+          {
+            "field": "body.error_rate",
+            "type": "less_than_equal"
+          }
+        ],
+        "request_id": "5429dfd8-f75d-465f-a2de-c322bce7363e"
+      }
+    },
+    "unauthorized": {
+      "http_status": 401,
+      "request_id": "61b2e3aa-e251-40d5-97f2-e89d73da1a4e",
+      "body": {
+        "code": "401",
+        "message": "Integration token required",
+        "request_id": "61b2e3aa-e251-40d5-97f2-e89d73da1a4e"
+      }
+    },
+    "unchanged_counts": {
+      "incidents_before": 3,
+      "incidents_after": 3,
+      "jobs_after": 3
+    },
+    "invalid_citation_rejected": true,
+    "lease_recovery": {
+      "fault": "Test harness forced the first worker lease into the past on a separate synthetic incident.",
+      "old_claim_version": 1,
+      "new_claim_version": 2,
+      "stale_worker_saved": false,
+      "replacement_worker_saved": true,
+      "persisted_report_count": 1,
+      "final_state": {
+        "incident_id": "6ffd2054-e31c-4331-aca0-9a819fa0b0b3",
+        "incident_status": "REPORT_READY",
+        "severity": "HIGH",
+        "job_id": "56a73127-7975-4539-bf1f-0c4f048aa3e4",
+        "job_status": "SUCCEEDED",
+        "attempts": 2,
+        "claim_version": 2,
+        "lease_until": null
+      }
+    }
+  }
+}

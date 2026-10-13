@@ -193,18 +193,41 @@ async def gather(c):
                         "duration_ms": round((time.monotonic() - tool_started) * 1000),
                     }
                 )
-        if not settings().llm_enabled or not settings().llm_api_key or not settings().llm_model:
-            report = recorded_report([], incident.error_rate, incident.service)
+        if not settings().llm_enabled or (
+            settings().llm_provider != "agentops" and (not settings().llm_api_key or not settings().llm_model)
+        ):
+            report = recorded_report(evidence, incident.error_rate, incident.service)
             report.update(
                 investigation_mode="needs_configuration",
                 uncertainty="Live model is not configured. No live AI analysis was performed.",
             )
         else:
             usage_id = await reserve_usage(incident)
-            report, tokens = await live_report(evidence, incident.error_rate, incident.service, c["id"])
+            from app.agents.routing import AIUnavailable
+
+            try:
+                report, tokens = await live_report(evidence, incident.error_rate, incident.service, c["id"])
+                usage_status = "COMPLETED"
+            except AIUnavailable as exc:
+                report = recorded_report(evidence, incident.error_rate, incident.service)
+                report.update(
+                    investigation_mode="needs_configuration",
+                    uncertainty=exc.reason
+                    + ". Deterministic diagnostics remain available; human review is required.",
+                )
+                tokens, usage_status = None, exc.code
+                steps.append(
+                    {
+                        "operation": "model_routing",
+                        "status": exc.code,
+                        "model_fallback": "none eligible",
+                        "workflow_fallback": "deterministic diagnostics and human review",
+                        "business_action_completed": False,
+                    }
+                )
             async with Session() as db:
                 await db.execute(
-                    update(Usage).where(Usage.id == usage_id).values(status="COMPLETED", tokens=tokens)
+                    update(Usage).where(Usage.id == usage_id).values(status=usage_status, tokens=tokens)
                 )
                 await db.commit()
     report["started_at"] = started_at

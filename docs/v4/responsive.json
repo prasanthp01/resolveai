@@ -1,0 +1,45 @@
+{
+  "verified_at": "2026-10-13T11:43:47.349248Z",
+  "checks": [
+    {
+      "width": 320,
+      "scroll": 305,
+      "input": "20"
+    },
+    {
+      "width": 375,
+      "scroll": 360,
+      "input": "20"
+    },
+    {
+      "width": 430,
+      "scroll": 415,
+      "input": "20"
+    },
+    {
+      "width": 768,
+      "scroll": 753,
+      "input": "20"
+    },
+    {
+      "width": 1280,
+      "scroll": 1265,
+      "input": "20"
+    },
+    {
+      "width": 1440,
+      "scroll": 1425,
+      "input": "20"
+    }
+  ],
+  "mobile_keyboard": {
+    "focus_trap": "PASS",
+    "escape": "PASS",
+    "focus_return": "PASS",
+    "scroll_unlock": "PASS"
+  },
+  "input_retained": "PASS",
+  "source_revision": "19d14e039eb446110147eff0a2cf80268f5d7de2",
+  "origin": "http://127.0.0.1:8133",
+  "note": "Built release screenshot/dimension measurements from browser; mobile keyboard checks were performed in the same-source development preview."
+}
