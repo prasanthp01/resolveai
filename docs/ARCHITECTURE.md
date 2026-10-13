@@ -1,6 +1,6 @@
-# ResolveAI architecture v1.0.0
+# ResolveAI architecture v1.0.1
 
-Application v0.1.0 · 2026-10-13 · Source commit `0b2ca9f5ea986df94cf6543906019011f221e445`
+Application v0.1.0 · 2026-10-13 · Source commit `330426a578102802716bffb317c8c65630c443c8`
 
 ResolveAI is a single-tenant incident investigation application. The private workspace accepts scoped alerts and persists investigation work in PostgreSQL. A separate public demo reads synthetic scenarios only. Findings cite evidence; an operator decides whether to act.
 
@@ -282,10 +282,6 @@ The Markdown architecture document is rendered from the same record used by the 
 
 ## Version changes
 
-- Initial high-level and low-level architecture learning guide tied to the implemented modular application.
+- Improve sequence-diagram arrow, actor-border, and message contrast on dark backgrounds.
 
-- Documented separate public synthetic and authenticated private modes.
-
-- Added durable incident acceptance, leased worker claims, fenced report commits, and bounded read-only diagnostics.
-
-- Added versioned architecture API, historical snapshot selection, code references, walkthroughs, and source-drift checking.
+- Retain the published 1.0.0 snapshot unchanged; component and trust boundaries are unchanged.

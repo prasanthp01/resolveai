@@ -1,0 +1,412 @@
+{
+  "version": "1.0.1",
+  "app_version": "0.1.0",
+  "date": "2026-10-13",
+  "source_commit": "330426a578102802716bffb317c8c65630c443c8",
+  "source_fingerprint": "e51b68107f271a98f8a35ddad3c394ded3fd5d9dcf40aee3d3c676c9fcc57184",
+  "summary": "ResolveAI is a single-tenant incident investigation application. The private workspace accepts scoped alerts and persists investigation work in PostgreSQL. A separate public demo reads synthetic scenarios only. Findings cite evidence; an operator decides whether to act.",
+  "changes": [
+    "Improve sequence-diagram arrow, actor-border, and message contrast on dark backgrounds.",
+    "Retain the published 1.0.0 snapshot unchanged; component and trust boundaries are unchanged."
+  ],
+  "high_level": {
+    "diagram": "flowchart TB\n Source[Monitoring source] -->|Token or signed webhook| API[FastAPI gateway]\n Owner[Administrator] -->|Session and CSRF| API\n API -->|Atomic incident and job| DB[(PostgreSQL)]\n DB -->|Claim and lease| Worker[Investigation worker]\n Worker --> Gateway[Connector policy gateway]\n Gateway --> PG[PostgreSQL metrics]\n Gateway --> Redis[Redis metrics]\n Worker -->|Optional evidence analysis| Model[Model provider]\n Worker -->|Fenced report commit| DB",
+    "sections": [
+      {
+        "title": "Two operating modes, one understandable codebase",
+        "summary": "The public experience is a controlled learning sandbox. The private experience performs authenticated investigations.",
+        "explanation": [
+          "Public mode rejects state-changing requests before database dependencies run. Its scenario endpoints read bounded JSON fixtures and apply deterministic evidence rules. The browser animates the recorded steps; this animation is not a live investigation.",
+          "For the constrained public VPS, scripts/export_demo.py exports the exact public scenario and architecture responses as static JSON beside the React build. The existing HTTPS proxy serves these files; there is no public Python process, database, or credential store. The container demo remains available for self-hosting.",
+          "Private mode enables administrator sessions, application and environment setup, scoped credentials, diagnostic connectors, and durable worker processing. Public and private deployments must have separate configuration and credentials. The public Compose profile does not start a database or worker.",
+          "An application is a monitored product. An environment identifies its deployment context, such as staging or production. This v0.1 product has one administrator, not independent customer tenants."
+        ],
+        "code": [
+          {
+            "path": "app/main.py",
+            "symbol": "guards",
+            "purpose": "Enforces public read-only mode before processing request bodies."
+          },
+          {
+            "path": "app/main.py",
+            "symbol": "demo_scenario",
+            "purpose": "Builds a reproducible synthetic report from fixture evidence."
+          },
+          {
+            "path": "scripts/export_demo.py",
+            "symbol": "export",
+            "purpose": "Builds a public-only static representation from the same canonical endpoints."
+          }
+        ]
+      },
+      {
+        "title": "The gateway accepts work durably",
+        "summary": "An HTTP success means the alert and the obligation to process it have been committed.",
+        "explanation": [
+          "FastAPI validates a strict Pydantic contract and derives the environment from the authenticated integration credential. A submitted payload cannot choose another application or environment.",
+          "The ingestion service inserts the incident and its job in one transaction. If the process fails after commit, the durable job remains. If the transaction fails, no new 202 response is returned.",
+          "An event ID is unique within its integration source. Sending the same body again returns the existing incident. Reusing an event ID for changed data returns a conflict. Different integrations can use the same external event ID."
+        ],
+        "code": [
+          {
+            "path": "app/schemas/contracts.py",
+            "symbol": "IncidentCreate",
+            "purpose": "Defines bounded event fields and rejects unknown fields."
+          },
+          {
+            "path": "app/services/incidents.py",
+            "symbol": "ingest",
+            "purpose": "Owns deduplication and the incident/job transaction."
+          }
+        ]
+      },
+      {
+        "title": "The worker owns execution, temporarily",
+        "summary": "A lease allows another worker to recover abandoned work without accepting a stale result.",
+        "explanation": [
+          "The worker selects eligible jobs using a row lock with SKIP LOCKED, increments the claim version, and commits ownership before contacting any external service. It does not hold that transaction while waiting for a connector or model.",
+          "A heartbeat extends ownership during bounded execution. Every final write requires the same job ID, worker owner, claim version, active state, and unexpired lease. A crashed worker cannot later overwrite the replacement worker\u2019s result.",
+          "Retry timing and attempts live in PostgreSQL. After three failed attempts, the job remains visible as DEAD_LETTER and the incident requires review. An operator can request a bounded retry. A report being ready never means the production incident is resolved."
+        ],
+        "code": [
+          {
+            "path": "app/jobs/worker.py",
+            "symbol": "claim",
+            "purpose": "Atomically establishes job ownership."
+          },
+          {
+            "path": "app/jobs/worker.py",
+            "symbol": "fence",
+            "purpose": "Defines conditions for valid completion and heartbeat writes."
+          }
+        ]
+      },
+      {
+        "title": "Diagnostics are capabilities, not arbitrary execution",
+        "summary": "A connector can perform only named operations on an explicitly permitted destination.",
+        "explanation": [
+          "PostgreSQL operations are fixed aggregate queries. Redis operations are selected INFO sections and a health check. No raw SQL, shell, arbitrary URL, Redis value access, or remediation tool is offered.",
+          "The connector gateway checks the environment, enabled state, operation allowlist, exact destination IP, network allowlist, timeout, and result size. DNS destinations are disabled in v0.1 to avoid rebinding ambiguity. Link-local and metadata destinations are rejected.",
+          "Connector secrets are encrypted with a key stored outside PostgreSQL. The model receives sanitized evidence only. Redaction is a practical safeguard with limitations, not proof that every possible secret format is detected."
+        ],
+        "code": [
+          {
+            "path": "app/connectors/gateway.py",
+            "symbol": "execute",
+            "purpose": "Authorizes and bounds every diagnostic operation."
+          },
+          {
+            "path": "app/core/security.py",
+            "symbol": "encrypt",
+            "purpose": "Protects stored connector and webhook secrets."
+          }
+        ]
+      },
+      {
+        "title": "The explanation is inspectable",
+        "summary": "Reports connect hypotheses to evidence instead of hiding the basis for a recommendation.",
+        "explanation": [
+          "The baseline severity comes from deterministic error-rate rules. Fixture analysis evaluates diagnostic numbers. Its ground-truth evaluation file stays in tests and is not passed into the investigator.",
+          "Optional live analysis uses a fixed provider adapter with a daily request reservation, bounded timeout and output size. It can return structured findings but has no tool execution authority. Missing configuration produces NEEDS_REVIEW with an explicit needs_configuration report.",
+          "The report validator rejects invented evidence IDs and unknown fields. Stored trace events describe observable operations and outcomes. Private model chain-of-thought is not collected."
+        ],
+        "code": [
+          {
+            "path": "app/agents/investigate.py",
+            "symbol": "validate_report",
+            "purpose": "Validates schema and evidence references."
+          },
+          {
+            "path": "app/jobs/worker.py",
+            "symbol": "reserve_usage",
+            "purpose": "Reserves model-call budget before an external request."
+          }
+        ]
+      }
+    ],
+    "public_diagram": "flowchart LR\n Visitor[Browser visitor] --> Web[React interface]\n Web --> API[Read-only public endpoints]\n API --> Data[Synthetic scenario files]\n API --> Docs[Versioned architecture records]"
+  },
+  "low_level": {
+    "diagram": "sequenceDiagram\n participant S as Monitoring source\n participant A as FastAPI\n participant P as PostgreSQL\n participant W as Worker\n participant C as Connector gateway\n S->>A: POST /api/v1/events + scoped token\n A->>A: Validate identity, schema, and quota\n A->>P: BEGIN, insert incident + job + audit\n P-->>A: COMMIT\n A-->>S: 202 + stable incident ID\n W->>P: Lock eligible job, increment claim version\n P-->>W: Commit lease ownership\n W->>C: Authorized bounded diagnostics\n C-->>W: Evidence with source and observation time\n W->>W: Analyze and validate report citations\n W->>P: Verify fence, save evidence/report, complete job\n P-->>W: COMMIT\n S->>A: GET incident report with scoped identity\n A->>P: Read source-scoped report\n A-->>S: Report, uncertainty, and evidence",
+    "data_diagram": "erDiagram\n APPLICATION ||--o{ ENVIRONMENT : contains\n ENVIRONMENT ||--o{ CREDENTIAL : scopes\n ENVIRONMENT ||--o{ CONNECTOR : authorizes\n CREDENTIAL ||--o{ INCIDENT : submits\n INCIDENT ||--|| JOB : schedules\n INCIDENT ||--o{ INVESTIGATION_RUN : attempts\n INVESTIGATION_RUN ||--o{ EVIDENCE : records\n INVESTIGATION_RUN ||--o| REPORT : produces\n INCIDENT ||--o{ AUDIT : explains\n INCIDENT ||--o{ MODEL_USAGE : budgets\n USER ||--o{ SESSION : authenticates",
+    "sections": [
+      {
+        "title": "Request contracts and identity separation",
+        "summary": "Browser sessions and integration credentials are different capabilities.",
+        "explanation": [
+          "An administrator password is stored as an Argon2 hash. The session cookie is HttpOnly, SameSite=Strict, and secure in HTTPS deployments. The server stores only the hash of the session token, with expiration. State changes also require an origin match and a CSRF token.",
+          "Integration tokens are high-entropy opaque strings, revealed once and hashed at rest. Their environment binding is looked up on the server. They can ingest and read incidents from their own source, but cannot configure the product or log in as administrator.",
+          "Webhook signatures cover the timestamp, a dot separator, and the exact raw request body. A five-minute timestamp tolerance and persisted replay key reject stale or repeated signed requests. Both the replay reservation and new incident are committed together."
+        ],
+        "code": [
+          {
+            "path": "app/core/security.py",
+            "symbol": "owner",
+            "purpose": "Validates administrator session and mutation protection."
+          },
+          {
+            "path": "app/core/security.py",
+            "symbol": "integration",
+            "purpose": "Authenticates and rate-limits source credentials."
+          },
+          {
+            "path": "app/main.py",
+            "symbol": "webhook",
+            "purpose": "Checks HMAC and reserves replay identity."
+          }
+        ]
+      },
+      {
+        "title": "Pydantic schema versus SQLAlchemy model",
+        "summary": "The request schema describes acceptable input; the persisted model describes durable state.",
+        "explanation": [
+          "IncidentCreate validates percentages, nonblank identifiers, bounded message lengths, timezone-aware dates, and declared investigation modes. It rejects arbitrary destination fields and unknown properties.",
+          "The Incident model includes internal identity, source binding, payload hash, normalized severity, processing status, and timestamps. Those values are not all supplied by the sender.",
+          "Alembic creates the schema. Foreign keys connect incidents to credentials and environments. A unique source/event constraint makes deduplication survive concurrent requests. Indexes support filtered incident lists and eligible-job selection."
+        ],
+        "code": [
+          {
+            "path": "app/schemas/contracts.py",
+            "symbol": "IncidentCreate",
+            "purpose": "Input validation contract."
+          },
+          {
+            "path": "app/models/incident.py",
+            "symbol": "class Incident",
+            "purpose": "Persisted incident state and database constraints."
+          },
+          {
+            "path": "app/models/incident.py",
+            "symbol": "class Job",
+            "purpose": "Durable queue state and claim ownership."
+          }
+        ]
+      },
+      {
+        "title": "Transaction and recovery boundaries",
+        "summary": "Small database transactions protect invariants while external work happens outside them.",
+        "explanation": [
+          "Ingest first checks for a prior event, then relies on the unique database constraint for races. The incident, processing marker, and acceptance audit event share one commit. A competing duplicate maps back to the stored incident.",
+          "The claim transaction locks one eligible job, marks abandoned attempts, creates an investigation run, advances the claim version, and records INVESTIGATING. The actual connector calls run after this transaction closes.",
+          "Completion first updates the job with fencing conditions. Only if that conditional write succeeds are evidence, the current report, run completion, incident status, and audit saved in the same transaction. A stale worker returns without saving a report."
+        ],
+        "code": [
+          {
+            "path": "app/services/incidents.py",
+            "symbol": "ingest",
+            "purpose": "Commit-before-202 and race-safe deduplication."
+          },
+          {
+            "path": "app/jobs/worker.py",
+            "symbol": "complete",
+            "purpose": "Fenced atomic finalization."
+          },
+          {
+            "path": "app/jobs/worker.py",
+            "symbol": "fail",
+            "purpose": "Persisted retry/backoff and visible terminal failure."
+          }
+        ]
+      },
+      {
+        "title": "Connector execution and evidence transformation",
+        "summary": "The adapter owns credentials; the investigator owns only sanitized diagnostic facts.",
+        "explanation": [
+          "Connector registration requires an existing environment, an allowed IP destination, and the external encryption key. Up to four connectors can be registered per environment. The API never returns their encrypted or plaintext secrets.",
+          "The PostgreSQL adapter enables a read-only session and short statement timeout, then executes fixed catalog queries. Monitoring-role visibility can limit wait metrics; database counters do not independently prove application connection-pool exhaustion.",
+          "The Redis adapter requests only selected memory and statistics fields, then keeps numeric allowlisted values. A restricted Redis ACL is independently required; gateway checks and server permissions provide separate protections.",
+          "Unavailable connectors produce recorded partial collection outcomes. A missing provider or failed analysis must not be mislabeled as successful live AI."
+        ],
+        "code": [
+          {
+            "path": "app/connectors/gateway.py",
+            "symbol": "destination",
+            "purpose": "Validates IP-only destination policy."
+          },
+          {
+            "path": "app/connectors/gateway.py",
+            "symbol": "OPERATIONS",
+            "purpose": "Lists the exact diagnostic capabilities."
+          },
+          {
+            "path": "app/jobs/worker.py",
+            "symbol": "gather",
+            "purpose": "Collects evidence outside long-running database transactions."
+          }
+        ]
+      },
+      {
+        "title": "Frontend state and report presentation",
+        "summary": "The browser renders server state and keeps synthetic replay unmistakable.",
+        "explanation": [
+          "The React shell separates overview, incident list, report detail, integrations, operations, and architecture. The public replay timer reveals pre-existing timeline entries; it creates no server job and calls no model.",
+          "The report view presents hypotheses, cited evidence, uncertainty, and human-reviewed recommendations. It labels synthetic analysis and avoids describing recommendations as executed operations.",
+          "The shared API client sends cookies and the CSRF header on same-origin requests. Integration credentials are held only in the one-time reveal component and are never saved in browser local storage.",
+          "The architecture module and Mermaid renderer are loaded only when needed. Diagrams have readable explanations and expandable source. Smaller screens retain navigation, readable report sections, and scrollable diagram canvases."
+        ],
+        "code": [
+          {
+            "path": "web/src/api.ts",
+            "symbol": "api",
+            "purpose": "Shared JSON client and safe error propagation."
+          },
+          {
+            "path": "web/src/main.tsx",
+            "symbol": "ReportView",
+            "purpose": "Evidence-linked findings and uncertainty."
+          },
+          {
+            "path": "web/src/Architecture.tsx",
+            "symbol": "ArchitecturePage",
+            "purpose": "Version selection and study views."
+          }
+        ]
+      },
+      {
+        "title": "Architecture records and release linkage",
+        "summary": "Documentation changes are part of the implementation, not a later handover task.",
+        "explanation": [
+          "architecture/index.json identifies the current version and retained historical snapshots. Each snapshot includes its architecture version, application version, date, source commit, diagrams, explanations, code references, and change notes.",
+          "The architecture checker hashes the source paths that define behavior and deployment. If code changes without a reviewed snapshot update, the consistency check fails. A separate history check prevents editing a snapshot already committed in the comparison branch.",
+          "The Markdown architecture document is rendered from the same record used by the API and browser. The fingerprint detects changes; a maintainer must still review whether the explanation accurately captures their meaning."
+        ],
+        "code": [
+          {
+            "path": "scripts/architecture.py",
+            "symbol": "fingerprint",
+            "purpose": "Detects architecture-affecting source changes."
+          },
+          {
+            "path": "scripts/architecture.py",
+            "symbol": "render",
+            "purpose": "Generates repository documentation from the canonical record."
+          },
+          {
+            "path": "app/main.py",
+            "symbol": "architecture_version",
+            "purpose": "Serves only versions explicitly listed in the index."
+          }
+        ]
+      }
+    ]
+  },
+  "walkthroughs": [
+    {
+      "title": "Follow one alert from HTTP to a report",
+      "steps": [
+        {
+          "title": "Start at the boundary",
+          "explanation": "Read the events route. Identify where the integration token becomes a trusted source identity. Send a synthetic event and record the returned UUID.",
+          "code": "app/main.py \u00b7 events"
+        },
+        {
+          "title": "Find the moment of acceptance",
+          "explanation": "Read ingest. Identify the single commit that makes both the incident and its job durable. Explain why returning before this point could lose accepted work.",
+          "code": "app/services/incidents.py \u00b7 ingest"
+        },
+        {
+          "title": "Observe the worker",
+          "explanation": "Run the worker once in an isolated environment. Follow claim, gather, and complete. Inspect the three corresponding audit entries.",
+          "code": "app/jobs/worker.py \u00b7 run_once"
+        },
+        {
+          "title": "Check the evidence",
+          "explanation": "Open the report and click an evidence reference. Compare the report citation with the stored evidence ID and source. Distinguish a plausible hypothesis from an independently verified root cause.",
+          "code": "web/src/main.tsx \u00b7 ReportView"
+        }
+      ]
+    },
+    {
+      "title": "Understand a worker crash and stale completion",
+      "steps": [
+        {
+          "title": "Create unfinished work",
+          "explanation": "In the disposable test environment, accept an incident and claim it without completing it. Inspect owner, version, lease_until, and attempts.",
+          "code": "tests/test_pipeline.py \u00b7 test_claim_exclusion_expiry_and_stale_fence"
+        },
+        {
+          "title": "Expire the lease",
+          "explanation": "The recovery test advances the lease into the past. A second worker claims the same logical job and receives a larger claim version.",
+          "code": "app/jobs/worker.py \u00b7 claim"
+        },
+        {
+          "title": "Try the old result",
+          "explanation": "Call complete with the old claim. It must return false and leave no stale report. The new claim can complete exactly one current report.",
+          "code": "app/jobs/worker.py \u00b7 fence"
+        },
+        {
+          "title": "Exhaust recovery",
+          "explanation": "Read the bounded retry test. Explain the difference between a dead-letter job, an investigation needing review, and an operational incident being resolved.",
+          "code": "tests/test_pipeline.py \u00b7 test_retries_exhaust_and_safe_replay"
+        }
+      ]
+    },
+    {
+      "title": "Trace a denied connector operation",
+      "steps": [
+        {
+          "title": "Separate permission layers",
+          "explanation": "Identify the environment binding, network policy, operation allowlist, and database/Redis server permissions. Each answers a different authorization question.",
+          "code": "app/connectors/gateway.py \u00b7 execute"
+        },
+        {
+          "title": "Try a forbidden operation safely",
+          "explanation": "Run the isolated negative tests. Arbitrary SQL, Redis value access, other-environment requests, and metadata destinations must be rejected before a useful external operation occurs.",
+          "code": "tests/test_pipeline.py \u00b7 test_connector_permission_and_injection"
+        },
+        {
+          "title": "Read an incomplete report",
+          "explanation": "Disable live provider configuration and request a live investigation in the private test instance. It must show needs_configuration and NEEDS_REVIEW without claiming live analysis.",
+          "code": "tests/test_pipeline.py \u00b7 test_live_without_key_does_not_claim_live_ai"
+        }
+      ]
+    },
+    {
+      "title": "Make one change and update its explanation",
+      "steps": [
+        {
+          "title": "Choose a small behavior",
+          "explanation": "For example, change a severity threshold and its boundary tests. Write down the expected behavior before editing.",
+          "code": "app/agents/investigate.py \u00b7 severity"
+        },
+        {
+          "title": "Observe documentation drift",
+          "explanation": "Run python scripts/architecture.py --check. A change in tracked implementation files should fail the fingerprint comparison.",
+          "code": "scripts/architecture.py \u00b7 check"
+        },
+        {
+          "title": "Publish a new architecture snapshot",
+          "explanation": "Copy the current JSON to a new version, explain what changed and why, update the source commit and fingerprint, and prepend its metadata to the index. Retain the previous snapshot.",
+          "code": "architecture/versions/"
+        },
+        {
+          "title": "Verify and study",
+          "explanation": "Regenerate Markdown, run the suite and architecture checks, then compare the selectable browser versions. Deploy only after the release gates pass.",
+          "code": "docs/ARCHITECTURE_VERSIONING.md"
+        }
+      ]
+    }
+  ],
+  "tradeoffs": [
+    {
+      "decision": "PostgreSQL is also the durable queue",
+      "reason": "One transactional storage system makes accepted-work durability understandable and avoids an additional queue service on a small host.",
+      "alternative": "Redis or a separate message broker adds operational complexity and another consistency boundary."
+    },
+    {
+      "decision": "A typed Python workflow instead of LangGraph",
+      "reason": "The current workflow is linear and bounded. Durable state already lives in jobs and investigation runs, so a graph framework would duplicate orchestration responsibilities.",
+      "alternative": "Adopt LangGraph when branching, resumable human checkpoints, or more complex orchestration provides measurable benefit."
+    },
+    {
+      "decision": "Public synthetic mode has no private dependencies",
+      "reason": "Visitors can study and replay incidents without real credentials, production data, or paid inference. A separate public export and private configuration preserve the boundary.",
+      "alternative": "Sharing private credentials or live tools with the public demo would make visitor traffic a larger security and cost risk."
+    },
+    {
+      "decision": "Exact IP allowlists for v0.1 connectors",
+      "reason": "IP-only approved destinations avoid DNS rebinding and redirect handling. Metadata and link-local addresses remain blocked.",
+      "alternative": "Hostname registration needs connect-time IP pinning and verified TLS name handling; that remains a future extension."
+    }
+  ]
+}
