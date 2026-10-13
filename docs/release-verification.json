@@ -1,0 +1,44 @@
+{
+  "verified_at": "2026-10-13T19:28:04.431706+00:00",
+  "implementation_commit": "e2f75c967712f38d5eae9719a4b1c4dae56307e3",
+  "scope": "single-host synthetic self-hosted release",
+  "tests": {
+    "tests": 153,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "hosted_ci": "https://github.com/prasanthp01/resolveai/actions/runs/38454458366",
+  "security": {
+    "high_critical_image_vulnerabilities": 0,
+    "source_secret_findings": 0,
+    "docker_misconfiguration_findings": 0,
+    "private_vulnerability_reporting": true
+  },
+  "runtime": {
+    "image_id": "sha256:a9bd56c9aba4d0ffe62cedcb695acd4eddb4877249810d25fdffccfd79d9410a",
+    "user": "10001",
+    "read_only": true,
+    "cap_drop": [
+      "ALL"
+    ],
+    "memory_bytes": 201326592,
+    "health": "healthy"
+  },
+  "browser": {
+    "mobile_viewport_width": 390,
+    "mobile_overflow": false,
+    "desktop_review": true,
+    "scope": "keyless scenario smoke; not physical-device or full accessibility certification",
+    "observed_scenarios": [
+      "Completed nine investigation stages",
+      "Architecture diagrams and history loaded"
+    ]
+  },
+  "not_validated": [
+    "Live paid-provider execution",
+    "Enterprise identity and tenancy",
+    "Commercial workload or production SLA",
+    "Independent penetration testing"
+  ]
+}

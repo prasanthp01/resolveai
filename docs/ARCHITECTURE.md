@@ -1,8 +1,8 @@
-# ResolveAI architecture v2.0.9
+# ResolveAI architecture v2.0.10
 
-Application v0.3.7 · 2026-10-13 · Source commit `ea397014beb8736cf0f105d949781e5029276360`
+Application v0.3.7 · 2026-10-13 · Source commit `e2f75c967712f38d5eae9719a4b1c4dae56307e3`
 
-Standalone synthetic studio served alongside its API, with portable container configuration and preserved private-runtime isolation.
+Verified standalone studio release with bounded private workers and portable project navigation.
 
 ## High-level architecture
 
@@ -469,12 +469,6 @@ Verification uses the same strict policy as the frozen Portfolio, checks compute
 
 ## Version changes
 
-- Serve compiled public studio assets from the synthetic service; unknown API and asset paths remain strict 404s.
+- Pin the architecture source reference to the complete verified implementation commit, including private-worker heartbeat and standalone navigation.
 
-- Publish a loopback-only one-container quick start with configurable public origin and resource limits.
-
-- Pin the frontend build base image and add runtime health monitoring.
-
-- Exclude private portfolio assets and operational handoffs from the open-source distribution.
-
-- Monitor the private worker with a successful-loop heartbeat and bound private runtime resource use.
+- Preserve all prior snapshots and their recorded provenance; no runtime contract or schema change.

@@ -1,6 +1,11 @@
 {
-  "current": "2.0.9",
+  "current": "2.0.10",
   "versions": [
+    {
+      "version": "2.0.10",
+      "date": "2026-10-13",
+      "summary": "Verified standalone studio release with bounded private workers and portable project navigation."
+    },
     {
       "version": "2.0.9",
       "date": "2026-10-13",
@@ -67,5 +72,5 @@
       "summary": "Initial evidence-first investigation architecture and study guide."
     }
   ],
-  "source_commit": "ea397014beb8736cf0f105d949781e5029276360"
+  "source_commit": "e2f75c967712f38d5eae9719a4b1c4dae56307e3"
 }
